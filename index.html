@@ -37,6 +37,7 @@
       <button class="btn btn-ghost" id="reset-btn">Reset</button>
     </header>
 
+    <!-- STATS -->
     <section class="stats">
       <div class="card stat">
         <span class="stat-label">Banca Atual</span>
@@ -54,11 +55,19 @@
       </div>
     </section>
 
+    <!-- CONTENT -->
     <section class="content">
+
       <div class="card">
         <h3>Evolução da Banca</h3>
         <canvas id="bank-chart" class="chart-placeholder"></canvas>
       </div>
+
+      <div class="card bets-history-card">
+        <h3>Histórico de Apostas</h3>
+        <div id="bets-history" class="bets-history"></div>
+      </div>
+
     </section>
 
   </main>
@@ -68,7 +77,7 @@
 <div id="bet-modal" class="modal hidden">
   <div class="modal-content">
     <header class="modal-header">
-      <h3>Adicionar Aposta</h3>
+      <h3>Adicionar Aposta 🎯</h3>
       <button id="close-bet-modal" class="btn btn-ghost">X</button>
     </header>
 
@@ -86,12 +95,12 @@
 
       <div class="form-group">
         <label class="label">Mercado</label>
-        <input class="input" type="text" id="market" placeholder="Ex: Over 2.5 Golos" required>
+        <input class="input" type="text" id="market" placeholder="Ex: Over 1.5" required>
       </div>
 
       <div class="form-group">
         <label class="label">Casa de Aposta</label>
-        <input class="input" type="text" id="bookmaker" placeholder="Ex: Bet365" required>
+        <input class="input" type="text" id="bookmaker" placeholder="Ex: Bwin" required>
       </div>
 
       <div class="form-group">
@@ -111,7 +120,6 @@
   </div>
 </div>
 
-<!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let bankroll = parseFloat(localStorage.getItem('bankroll')) || 1000;
@@ -120,6 +128,7 @@ let chart;
 
 updateStats();
 renderChart();
+renderHistory();
 
 /* MODAL */
 const modal = document.getElementById('bet-modal');
@@ -135,6 +144,7 @@ document.getElementById('reset-btn').onclick = () => {
     saveData();
     updateStats();
     renderChart();
+    renderHistory();
   }
 };
 
@@ -142,27 +152,35 @@ document.getElementById('reset-btn').onclick = () => {
 document.getElementById('bet-form').onsubmit = e => {
   e.preventDefault();
 
-  const stake = +document.getElementById('stake').value;
-  const odds = +document.getElementById('odds').value;
-  const market = document.getElementById('market').value;
-  const bookmaker = document.getElementById('bookmaker').value;
-  const result = document.getElementById('result').value;
-
-  if(stake <= 0 || odds < 1.01) {
-    alert('Valores inválidos');
-    return;
-  }
+  const stake = +stake.value;
+  const odds = +odds.value;
+  const market = marketInput.value;
+  const bookmaker = bookmakerInput.value;
+  const result = resultSelect.value;
 
   let profit = 0;
   if(result === 'win') profit = stake * (odds - 1);
   if(result === 'loss') profit = -stake;
 
-  bets.push({ stake, odds, market, bookmaker, result, profit });
+  bets.push({
+    stake,
+    odds,
+    market,
+    bookmaker,
+    sport: 'Futebol',
+    event: market,
+    type: 'Simples',
+    result,
+    profit,
+    date: new Date().toISOString()
+  });
+
   bankroll += profit;
 
   saveData();
   updateStats();
   renderChart();
+  renderHistory();
 
   e.target.reset();
   modal.classList.add('hidden');
@@ -174,8 +192,67 @@ function updateStats() {
   const roi = totalStake ? ((totalProfit/totalStake)*100).toFixed(2) : 0;
 
   document.getElementById('bank-value').textContent = `€${bankroll.toFixed(2)}`;
-  document.getElementById('profit-value').textContent = `€${totalProfit.toFixed(2)}`;
+  document.getElementById('profit-value').textContent = `${totalProfit>=0?'+':''}€${totalProfit.toFixed(2)}`;
   document.getElementById('roi-value').textContent = `${roi}%`;
+}
+
+function renderHistory() {
+  const container = document.getElementById('bets-history');
+  container.innerHTML = '';
+
+  if (!bets.length) {
+    container.innerHTML = `<p style="color:var(--text-secondary)">Sem apostas registadas.</p>`;
+    return;
+  }
+
+  const grouped = {};
+
+  bets.slice().reverse().forEach(b => {
+    const d = new Date(b.date);
+    const key = d.toLocaleDateString('pt-PT', { weekday:'long', day:'2-digit' });
+    grouped[key] ??= [];
+    grouped[key].push(b);
+  });
+
+  Object.entries(grouped).forEach(([day, items]) => {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'bet-day';
+    dayDiv.innerHTML = `<div class="bet-day-header">${day}</div>`;
+
+    items.forEach(b => {
+      const time = new Date(b.date).toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'});
+      const status = b.result === 'win' ? 'win' : 'loss';
+
+      const card = document.createElement('div');
+      card.className = 'bet-card';
+      card.innerHTML = `
+        <div class="bet-top">
+          <div class="bet-meta">
+            <span>${time}</span>
+            <span>${b.type}</span>
+            <span>${b.bookmaker}</span>
+            <span>${b.sport}</span>
+          </div>
+          <div class="bet-profit ${status}">
+            ${b.profit>=0?'+':''}€${b.profit.toFixed(2)}
+          </div>
+        </div>
+
+        <div class="bet-event">${b.event}</div>
+        <div class="bet-market">${b.market}</div>
+
+        <div class="bet-grid">
+          <div class="bet-box"><strong>${b.odds}</strong>Cotação</div>
+          <div class="bet-box"><strong>€${b.stake}</strong>Valor</div>
+          <div class="bet-box"><strong>€${(b.stake*b.odds).toFixed(2)}</strong>Ganho</div>
+          <div class="bet-box"><strong>€${b.profit.toFixed(2)}</strong>Lucro</div>
+        </div>
+      `;
+      dayDiv.appendChild(card);
+    });
+
+    container.appendChild(dayDiv);
+  });
 }
 
 function saveData() {
@@ -203,6 +280,5 @@ function renderChart() {
   });
 }
 </script>
-
 </body>
 </html>

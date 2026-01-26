@@ -285,3 +285,95 @@ body {
   .sidebar { flex-direction: row; justify-content: space-around; padding: var(--space-sm); border-right: none; border-bottom: 1px solid var(--border); }
 }
 
+/* =========================
+   BETS HISTORY PRO
+========================= */
+
+.bets-history {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* DIA */
+.bet-day {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bet-day-header {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+/* CARD */
+.bet-card {
+  background: linear-gradient(145deg, #0b1120, #111827);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* TOP */
+.bet-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bet-profit {
+  font-weight: 800;
+  font-size: var(--fs-lg);
+}
+
+.bet-profit.win { color: var(--success); }
+.bet-profit.loss { color: var(--danger); }
+
+/* META */
+.bet-meta {
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* EVENTO */
+.bet-event {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.bet-market {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+
+/* GRID INFO */
+.bet-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.bet-box {
+  background: #020617;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  text-align: center;
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+}
+
+.bet-box strong {
+  display: block;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+}
