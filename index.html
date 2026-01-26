@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/layout.css">
   <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/modal.css">
   <link rel="stylesheet" href="assets/css/pages/dashboard.css">
 </head>
 <body>
@@ -20,8 +21,12 @@
     <h1 class="logo">Bankroll</h1>
     <nav class="nav">
       <a href="#" class="nav-link active">Dashboard</a>
-      <a href="#" class="nav-link" id="add-bet-btn">Adicionar Aposta</a>
     </nav>
+
+    <!-- BOTÃO + ADICIONAR APOSTA -->
+    <button id="open-bet-modal" class="btn btn-primary add-bet-btn">
+      + ADICIONAR APOSTA
+    </button>
   </aside>
 
   <!-- MAIN -->
@@ -57,29 +62,35 @@
         <h3>Evolução da Banca</h3>
         <canvas id="bank-chart" class="chart-placeholder"></canvas>
       </div>
-
-      <div class="card">
-        <h3>Adicionar Aposta</h3>
-        <form id="bet-form">
-          <label class="label" for="stake">Stake (€)</label>
-          <input class="input" type="number" id="stake" required />
-
-          <label class="label" for="odds">Odds</label>
-          <input class="input" type="number" step="0.01" id="odds" required />
-
-          <label class="label" for="result">Resultado</label>
-          <select class="input" id="result" required>
-            <option value="win">Win</option>
-            <option value="loss">Loss</option>
-            <option value="void">Void</option>
-          </select>
-
-          <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Adicionar Aposta</button>
-        </form>
-      </div>
     </section>
 
   </main>
+</div>
+
+<!-- MODAL ADICIONAR APOSTA -->
+<div id="bet-modal" class="modal hidden">
+  <div class="modal-content">
+    <header class="modal-header">
+      <h3>Adicionar Aposta</h3>
+      <button id="close-bet-modal" class="btn btn-ghost">X</button>
+    </header>
+    <form id="bet-form">
+      <label class="label" for="stake">Stake (€)</label>
+      <input class="input" type="number" id="stake" required />
+
+      <label class="label" for="odds">Odds</label>
+      <input class="input" type="number" step="0.01" id="odds" required />
+
+      <label class="label" for="result">Resultado</label>
+      <select class="input" id="result" required>
+        <option value="win">Win</option>
+        <option value="loss">Loss</option>
+        <option value="void">Void</option>
+      </select>
+
+      <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Adicionar</button>
+    </form>
+  </div>
 </div>
 
 <!-- JS -->
@@ -107,12 +118,38 @@ document.getElementById('reset-btn').addEventListener('click', () => {
   }
 });
 
+// ============================
+// MODAL + ADICIONAR APOSTA
+// ============================
+const openBtn = document.getElementById('open-bet-modal');
+const closeBtn = document.getElementById('close-bet-modal');
+const modal = document.getElementById('bet-modal');
+
+openBtn.addEventListener('click', () => {
+  modal.classList.remove('hidden');
+});
+
+closeBtn.addEventListener('click', () => {
+  modal.classList.add('hidden');
+});
+
+// Fechar modal clicando fora
+modal.addEventListener('click', (e) => {
+  if(e.target === modal) modal.classList.add('hidden');
+});
+
 // Adicionar aposta
 document.getElementById('bet-form').addEventListener('submit', (e) => {
   e.preventDefault();
   const stake = parseFloat(document.getElementById('stake').value);
   const odds = parseFloat(document.getElementById('odds').value);
   const result = document.getElementById('result').value;
+
+  // Validação simples
+  if(stake <= 0 || odds < 1.01) {
+    alert("Valores inválidos para Stake ou Odds!");
+    return;
+  }
 
   let profit = 0;
   if(result === 'win') profit = stake * (odds - 1);
@@ -126,7 +163,12 @@ document.getElementById('bet-form').addEventListener('submit', (e) => {
   renderChart();
 
   e.target.reset();
+  modal.classList.add('hidden'); // fechar modal ao adicionar
 });
+
+// ============================
+// FUNÇÕES AUXILIARES
+// ============================
 
 // Atualiza métricas no dashboard
 function updateStats() {
@@ -151,7 +193,6 @@ function saveData() {
 function renderChart() {
   const ctx = document.getElementById('bank-chart').getContext('2d');
 
-  // limitar numero de pontos para performance
   const maxPoints = 30; // mostrar no máximo 30 apostas
   const displayBets = bets.slice(-maxPoints);
 
@@ -163,7 +204,6 @@ function renderChart() {
     data.push(cumBank);
   });
 
-  // destruir gráfico anterior para evitar duplicação
   if(chart) {
     chart.destroy();
     chart = null;
@@ -194,7 +234,6 @@ function renderChart() {
     }
   });
 }
-
 </script>
 </body>
 </html>
