@@ -1,0 +1,131 @@
+/* =====================================================
+   COMPONENTS.CSS
+   Componentes reutilizáveis: cards, botões, badges, inputs
+   ===================================================== */
+
+/* =========================
+   CARDS
+========================= */
+.card {
+  background-color: var(--card);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================
+   BOTÕES
+========================= */
+.btn {
+  height: 42px;
+  padding: 0 var(--space-md);
+  border-radius: var(--radius-sm);
+  border: none;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* Botão principal */
+.btn-primary {
+  background-color: var(--accent);
+  color: #020617;
+}
+
+.btn-primary:hover {
+  background-color: #22c7f0;
+}
+
+/* Botão transparente/ghost */
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+/* =========================
+   STATÍSTICAS
+========================= */
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.stat-label {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-size: var(--fs-xl);
+  font-weight: 600;
+}
+
+.stat-value.positive {
+  color: var(--success);
+}
+
+.stat-value.negative {
+  color: var(--danger);
+}
+
+/* =========================
+   INPUTS E FORMULÁRIOS
+========================= */
+.input {
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  color: var(--text-primary);
+  font-size: var(--fs-base);
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Labels */
+.label {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+/* =========================
+   BADGES / TAGS
+========================= */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+}
+
+.badge.success {
+  background-color: var(--success);
+  color: #020617;
+}
+
+.badge.danger {
+  background-color: var(--danger);
+  color: #fff;
+}

@@ -1,0 +1,139 @@
+/* =====================================================
+   LAYOUT.CSS
+   Estrutura geral da aplicação: grid, sidebar, main,
+   header, espaçamentos macro
+   ===================================================== */
+
+/* =========================
+   APP GRID
+========================= */
+
+.app {
+  display: grid;
+  grid-template-columns: 260px 1fr; /* sidebar + main content */
+  min-height: 100vh;                /* sempre altura total da viewport */
+  background-color: var(--bg);
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+  background-color: var(--surface);
+  padding: var(--space-lg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Logo no topo da sidebar */
+.sidebar .logo {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-xl);
+  color: var(--accent);
+}
+
+/* Navegação da sidebar */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+.nav-link.active {
+  background-color: rgba(56, 189, 248, 0.15);
+  color: var(--accent);
+}
+
+/* =========================
+   MAIN CONTENT
+========================= */
+
+.main {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+/* =========================
+   SECTIONS
+========================= */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* Placeholder de gráficos */
+.chart-placeholder {
+  height: 260px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border);
+  opacity: 0.6;
+}
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 1024px) {
+  .app {
+    grid-template-columns: 220px 1fr;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .app {
+    grid-template-columns: 1fr; /* sidebar colapsa em mobile */
+  }
+
+  .sidebar {
+    flex-direction: row;
+    justify-content: space-around;
+    padding: var(--space-sm);
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
