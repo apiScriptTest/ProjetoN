@@ -41,12 +41,12 @@
     <section class="stats">
       <div class="card stat">
         <span class="stat-label">Banca Atual</span>
-        <strong class="stat-value bank" id="bank-value">€0</strong>
+        <strong class="stat-value bank" id="bank-value">€0.00</strong>
       </div>
 
       <div class="card stat">
         <span class="stat-label">Lucro</span>
-        <strong class="stat-value profit" id="profit-value">€0</strong>
+        <strong class="stat-value profit" id="profit-value">€0.00</strong>
       </div>
 
       <div class="card stat">
@@ -58,14 +58,16 @@
     <!-- CONTENT -->
     <section class="content">
 
+      <!-- GRÁFICO -->
       <div class="card">
         <h3>Evolução da Banca</h3>
         <canvas id="bank-chart" class="chart-placeholder"></canvas>
       </div>
 
+      <!-- HISTÓRICO -->
       <div class="card bets-history-card">
         <h3>Histórico de Apostas</h3>
-        <div id="bets-history" class="bets-history"></div>
+        <div id="bets-history"></div>
       </div>
 
     </section>
@@ -81,11 +83,16 @@
       <button id="close-bet-modal" class="btn btn-ghost">X</button>
     </header>
 
-    <form id="bet-form" class="modal-form">
+    <form id="bet-form">
+
+      <div class="form-group">
+        <label class="label">Jogo</label>
+        <input class="input" type="text" id="event" placeholder="Ex: Benfica vs Porto" required>
+      </div>
 
       <div class="form-group">
         <label class="label">Stake (€)</label>
-        <input class="input" type="number" id="stake" required>
+        <input class="input" type="number" step="0.01" id="stake" required>
       </div>
 
       <div class="form-group">
@@ -95,83 +102,105 @@
 
       <div class="form-group">
         <label class="label">Mercado</label>
-        <input class="input" type="text" id="market" placeholder="Ex: Over 1.5" required>
+        <input class="input" type="text" id="market" placeholder="Over 1.5" required>
       </div>
 
       <div class="form-group">
         <label class="label">Casa de Aposta</label>
-        <input class="input" type="text" id="bookmaker" placeholder="Ex: Bwin" required>
+        <input class="input" type="text" id="bookmaker" placeholder="Bwin" required>
       </div>
 
       <div class="form-group">
         <label class="label">Resultado</label>
-        <select class="input" id="result" required>
+        <select class="input" id="result">
           <option value="win">Win</option>
           <option value="loss">Loss</option>
           <option value="void">Void</option>
         </select>
       </div>
 
-      <button type="submit" class="btn btn-primary">
-        Guardar Aposta
-      </button>
-
+      <button type="submit" class="btn btn-primary">Guardar Aposta</button>
     </form>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-let bankroll = parseFloat(localStorage.getItem('bankroll')) || 1000;
+/* ======================
+   STATE
+====================== */
+let bankroll = Number(localStorage.getItem('bankroll')) || 1000;
 let bets = JSON.parse(localStorage.getItem('bets')) || [];
 let chart;
 
+/* ======================
+   ELEMENTOS
+====================== */
+const modal = document.getElementById('bet-modal');
+const eventInput = document.getElementById('event');
+const stakeInput = document.getElementById('stake');
+const oddsInput = document.getElementById('odds');
+const marketInput = document.getElementById('market');
+const bookmakerInput = document.getElementById('bookmaker');
+const resultSelect = document.getElementById('result');
+
+/* ======================
+   INIT
+====================== */
 updateStats();
 renderChart();
 renderHistory();
 
-/* MODAL */
-const modal = document.getElementById('bet-modal');
+/* ======================
+   MODAL
+====================== */
 document.getElementById('open-bet-modal').onclick = () => modal.classList.remove('hidden');
 document.getElementById('close-bet-modal').onclick = () => modal.classList.add('hidden');
-modal.onclick = e => { if(e.target === modal) modal.classList.add('hidden'); };
+modal.onclick = e => { if (e.target === modal) modal.classList.add('hidden'); };
 
-/* RESET */
+/* ======================
+   RESET
+====================== */
 document.getElementById('reset-btn').onclick = () => {
-  if(confirm('Resetar banca e apostas?')) {
-    bankroll = 1000;
-    bets = [];
-    saveData();
-    updateStats();
-    renderChart();
-    renderHistory();
-  }
+  if (!confirm('Resetar banca e apostas?')) return;
+  bankroll = 1000;
+  bets = [];
+  saveData();
+  updateStats();
+  renderChart();
+  renderHistory();
 };
 
-/* ADD BET */
+/* ======================
+   ADD BET
+====================== */
 document.getElementById('bet-form').onsubmit = e => {
   e.preventDefault();
 
-  const stake = +stake.value;
-  const odds = +odds.value;
-  const market = marketInput.value;
-  const bookmaker = bookmakerInput.value;
+  const event = eventInput.value.trim();
+  const stake = Number(stakeInput.value);
+  const odds = Number(oddsInput.value);
+  const market = marketInput.value.trim();
+  const bookmaker = bookmakerInput.value.trim();
   const result = resultSelect.value;
 
+  if (!event) { alert('Insira o jogo.'); return; }
+  if (!stake || stake <= 0 || odds < 1.01) { alert('Stake ou odds inválidas'); return; }
+
   let profit = 0;
-  if(result === 'win') profit = stake * (odds - 1);
-  if(result === 'loss') profit = -stake;
+  if (result === 'win') profit = stake * (odds - 1);
+  if (result === 'loss') profit = -stake;
 
   bets.push({
     stake,
     odds,
     market,
     bookmaker,
-    sport: 'Futebol',
-    event: market,
-    type: 'Simples',
     result,
     profit,
+    type: 'Simples',
+    sport: 'Futebol',
+    event,
     date: new Date().toISOString()
   });
 
@@ -186,97 +215,128 @@ document.getElementById('bet-form').onsubmit = e => {
   modal.classList.add('hidden');
 };
 
+/* ======================
+   STATS
+====================== */
 function updateStats() {
   const totalProfit = bets.reduce((s,b)=>s+b.profit,0);
   const totalStake = bets.reduce((s,b)=>s+b.stake,0);
   const roi = totalStake ? ((totalProfit/totalStake)*100).toFixed(2) : 0;
 
   document.getElementById('bank-value').textContent = `€${bankroll.toFixed(2)}`;
-  document.getElementById('profit-value').textContent = `${totalProfit>=0?'+':''}€${totalProfit.toFixed(2)}`;
+  document.getElementById('profit-value').textContent =
+    `${totalProfit>=0?'+':''}€${totalProfit.toFixed(2)}`;
   document.getElementById('roi-value').textContent = `${roi}%`;
 }
 
+/* ======================
+   HISTORY
+====================== */
 function renderHistory() {
   const container = document.getElementById('bets-history');
   container.innerHTML = '';
 
   if (!bets.length) {
-    container.innerHTML = `<p style="color:var(--text-secondary)">Sem apostas registadas.</p>`;
+    container.innerHTML = '<p style="color:var(--text-secondary)">Sem apostas.</p>';
     return;
   }
 
-  const grouped = {};
+  bets.slice().reverse().forEach((b, index) => {
+    const time = new Date(b.date).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
 
-  bets.slice().reverse().forEach(b => {
-    const d = new Date(b.date);
-    const key = d.toLocaleDateString('pt-PT', { weekday:'long', day:'2-digit' });
-    grouped[key] ??= [];
-    grouped[key].push(b);
-  });
+    const card = document.createElement('div');
+    card.className = `bet-card ${b.result}`;
 
-  Object.entries(grouped).forEach(([day, items]) => {
-    const dayDiv = document.createElement('div');
-    dayDiv.className = 'bet-day';
-    dayDiv.innerHTML = `<div class="bet-day-header">${day}</div>`;
+    card.innerHTML = `
+      <div class="bet-actions">
+        <button class="bet-action-btn" onclick="editBet(${index})">✏️</button>
+        <button class="bet-action-btn" onclick="deleteBet(${index})">🗑️</button>
+      </div>
 
-    items.forEach(b => {
-      const time = new Date(b.date).toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'});
-      const status = b.result === 'win' ? 'win' : 'loss';
-
-      const card = document.createElement('div');
-      card.className = 'bet-card';
-      card.innerHTML = `
-        <div class="bet-top">
-          <div class="bet-meta">
-            <span>${time}</span>
-            <span>${b.type}</span>
-            <span>${b.bookmaker}</span>
-            <span>${b.sport}</span>
-          </div>
-          <div class="bet-profit ${status}">
-            ${b.profit>=0?'+':''}€${b.profit.toFixed(2)}
-          </div>
+      <div class="bet-top">
+        <div class="bet-meta">
+          <span>Horário: <strong>${time}</strong></span>
+          <span>Tipo de Aposta: <strong>${b.type}</strong></span>
+          <span>Casa de Apostas: <strong>${b.bookmaker}</strong></span>
         </div>
-
-        <div class="bet-event">${b.event}</div>
-        <div class="bet-market">${b.market}</div>
-
-        <div class="bet-grid">
-          <div class="bet-box"><strong>${b.odds}</strong>Cotação</div>
-          <div class="bet-box"><strong>€${b.stake}</strong>Valor</div>
-          <div class="bet-box"><strong>€${(b.stake*b.odds).toFixed(2)}</strong>Ganho</div>
-          <div class="bet-box"><strong>€${b.profit.toFixed(2)}</strong>Lucro</div>
+        <div class="bet-profit ${b.result}">
+          <strong>${b.profit >= 0 ? '+' : '-'}€${Math.abs(b.profit).toFixed(2)}</strong>
         </div>
-      `;
-      dayDiv.appendChild(card);
-    });
+      </div>
 
-    container.appendChild(dayDiv);
+      <div class="bet-event"><strong>Jogo: ${b.event}</strong></div>
+      <div class="bet-market"><strong>Mercado: ${b.market}</strong></div>
+
+      <div class="bet-grid">
+        <div class="bet-box"><strong>${b.odds.toFixed(2)}</strong> Cotação</div>
+        <div class="bet-box"><strong>€${b.stake.toFixed(2)}</strong> Valor</div>
+        <div class="bet-box"><strong>€${(b.stake * b.odds).toFixed(2)}</strong> Ganho</div>
+        <div class="bet-box"><strong>€${b.profit.toFixed(2)}</strong> Lucro</div>
+      </div>
+    `;
+
+    container.appendChild(card);
   });
 }
 
+/* ======================
+   EDIT / DELETE
+====================== */
+function deleteBet(index) {
+  if (!confirm('Apagar aposta?')) return;
+  bets.splice(index,1);
+  saveData();
+  updateStats();
+  renderChart();
+  renderHistory();
+}
+
+function editBet(index) {
+  const b = bets[index];
+  eventInput.value = b.event;
+  stakeInput.value = b.stake;
+  oddsInput.value = b.odds;
+  marketInput.value = b.market;
+  bookmakerInput.value = b.bookmaker;
+  resultSelect.value = b.result;
+  deleteBet(index);
+  modal.classList.remove('hidden');
+}
+
+/* ======================
+   STORAGE
+====================== */
 function saveData() {
   localStorage.setItem('bankroll', bankroll);
   localStorage.setItem('bets', JSON.stringify(bets));
 }
 
+/* ======================
+   CHART
+====================== */
 function renderChart() {
   const ctx = document.getElementById('bank-chart').getContext('2d');
-  if(chart) chart.destroy();
+  if (chart) chart.destroy();
 
   let value = 1000;
   const data = bets.map(b => value += b.profit);
 
   chart = new Chart(ctx,{
     type:'line',
-    data:{ labels:data.map((_,i)=>`Aposta ${i+1}`), datasets:[{
-      data,
-      fill:true,
-      borderColor:'#38bdf8',
-      backgroundColor:'rgba(56,189,248,0.2)',
-      tension:0.3
-    }]},
-    options:{ responsive:true, plugins:{ legend:{ display:false }}}
+    data:{
+      labels:data.map((_,i)=>`Aposta ${i+1}`),
+      datasets:[{
+        data,
+        fill:true,
+        borderColor:'#38bdf8',
+        backgroundColor:'rgba(56,189,248,0.2)',
+        tension:0.3
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{ legend:{ display:false } }
+    }
   });
 }
 </script>
