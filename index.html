@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bankroll Elite Pro</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/layout.css">
   <link rel="stylesheet" href="assets/css/components.css">
@@ -23,8 +23,8 @@
     <nav class="side-nav">
       <div class="nav-group">
         <label>PRINCIPAL</label>
-        <a href="#" class="nav-item active">Dashboard</a>
-        <a href="#" class="nav-item">Performance</a>
+        <a href="index.html" class="nav-item active">Dashboard</a>
+        <a href="performance.html" class="nav-item">Performance</a>
       </div>
       <div class="nav-group">
         <label>GESTÃO</label>
@@ -50,15 +50,15 @@
       <section class="top-metrics">
         <div class="metric-card">
           <span>Banca Total</span>
-          <h2 id="bank-value">€0.00</h2>
+          <h2 id="bank-value" style="font-family: 'JetBrains Mono', monospace;">€0.00</h2>
         </div>
         <div class="metric-card">
           <span>Lucro Líquido</span>
-          <h2 id="profit-value">€0.00</h2>
+          <h2 id="profit-value" style="font-family: 'JetBrains Mono', monospace;">€0.00</h2>
         </div>
         <div class="metric-card">
           <span>ROI</span>
-          <h2 id="roi-value">0%</h2>
+          <h2 id="roi-value" style="font-family: 'JetBrains Mono', monospace;">0%</h2>
         </div>
       </section>
 
@@ -109,7 +109,7 @@
       
       <div class="input-row">
         <div class="input-group">
-          <label>Stake (€)</label>
+          <label>Stake (€) <span id="auto-stake-label" style="font-size: 9px; color: var(--accent); margin-left: 5px;"></span></label>
           <div class="custom-number-input">
             <button type="button" class="spin-btn" onclick="stepValue('stake', -5)">-</button>
             <input type="number" step="0.01" id="stake" value="0" required>
@@ -145,15 +145,32 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// Inicialização de Dados
 let bankroll = Number(localStorage.getItem('bankroll')) || 1000;
 let bets = JSON.parse(localStorage.getItem('bets')) || [];
 let chart;
 
 const modal = document.getElementById('bet-modal');
-document.getElementById('open-bet-modal').onclick = () => modal.classList.remove('hidden');
+
+// 1. AUTO-STAKE AO ABRIR MODAL
+document.getElementById('open-bet-modal').onclick = () => {
+    const currentBank = Number(localStorage.getItem('bankroll')) || 1000;
+    const stakePercent = Number(localStorage.getItem('active_stake_percent')) || 2;
+    const suggestedStake = (currentBank * (stakePercent / 100)).toFixed(2);
+    
+    document.getElementById('stake').value = suggestedStake;
+    document.getElementById('auto-stake-label').innerText = `(Sugerido ${stakePercent}%)`;
+    modal.classList.remove('hidden');
+};
+
 document.getElementById('close-bet-modal').onclick = () => modal.classList.add('hidden');
 
-// FUNÇÃO PARA AS NOVAS SETINHAS
+// Sincronização automática quando voltas à aba (se mudaste de banca)
+window.onfocus = () => {
+    bankroll = Number(localStorage.getItem('bankroll')) || 1000;
+    updateUI();
+};
+
 function stepValue(id, step) {
   const input = document.getElementById(id);
   let val = parseFloat(input.value) || 0;
@@ -186,9 +203,17 @@ function updateUI() {
   renderChart();
 }
 
+// 2. SUBMISSÃO COM TRAVÃO DE SEGURANÇA (CARTÃO VERMELHO)
 document.getElementById('bet-form').onsubmit = e => {
   e.preventDefault();
   const stake = Number(document.getElementById('stake').value);
+  
+  // Travão: Máximo 10% da banca por aposta (Proteção de Cisne Negro)
+  const maxSafety = bankroll * 0.10;
+  if (stake > maxSafety) {
+    if (!confirm(`⚠️ ALERTA DE RISCO: Esta stake (€${stake}) excede 10% da banca. Isto pode levar a um "Cartão Vermelho". Continuar?`)) return;
+  }
+
   const odds = Number(document.getElementById('odds').value);
   const result = document.getElementById('result').value;
   let profit = result === 'win' ? stake * (odds - 1) : (result === 'loss' ? -stake : 0);
@@ -203,10 +228,23 @@ document.getElementById('bet-form').onsubmit = e => {
   bankroll += profit;
   localStorage.setItem('bankroll', bankroll);
   localStorage.setItem('bets', JSON.stringify(bets));
+  
+  // Atualiza o saldo na lista de bancas para manter sincronia
+  updateBancaAtiva(bankroll);
+  
   updateUI();
   e.target.reset();
   modal.classList.add('hidden');
 };
+
+function updateBancaAtiva(novoSaldo) {
+    let bancas = JSON.parse(localStorage.getItem('bancas')) || [];
+    const index = bancas.findIndex(b => b.ativa === true);
+    if(index !== -1) {
+        bancas[index].saldo = novoSaldo;
+        localStorage.setItem('bancas', JSON.stringify(bancas));
+    }
+}
 
 function renderHistory() {
   const container = document.getElementById('bets-history');
@@ -216,24 +254,15 @@ function renderHistory() {
     const card = document.createElement('div');
     card.className = `bet-card-new ${b.result}`;
     card.innerHTML = `
-      <div class="event-section">
-        <strong>${b.event}</strong>
-        <span>${b.market}</span>
-      </div>
-      <div class="data-column">
-        <span>Stake</span>
-        <b>€${b.stake}</b>
-      </div>
-      <div class="data-column">
-        <span>Odds</span>
-        <b>${b.odds}</b>
-      </div>
+      <div class="event-section"><strong>${b.event}</strong><span>${b.market}</span></div>
+      <div class="data-column"><span>Stake</span><b>€${b.stake}</b></div>
+      <div class="data-column"><span>Odds</span><b>${b.odds}</b></div>
       <div class="profit-column">
-        <span style="font-size: 10px; color: #475569; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 2px;">Resultado</span>
+        <span style="font-size: 10px; color: #475569; font-weight: 800; text-transform: uppercase;">Resultado</span>
         <b style="color: ${b.profit >= 0 ? 'var(--success)' : 'var(--danger)'}">
           ${b.profit >= 0 ? '+' : ''}${b.profit.toFixed(2)}€
-          </b>
-          </div>
+        </b>
+      </div>
     `;
     container.appendChild(card);
   });
@@ -241,54 +270,33 @@ function renderHistory() {
 
 function renderChart() {
   const container = document.querySelector('.canvas-holder');
-  
   container.innerHTML = '<canvas id="bank-chart"></canvas>';
-  
-  const canvas = document.getElementById('bank-chart');
-  const ctx = canvas.getContext('2d');
+  const ctx = document.getElementById('bank-chart').getContext('2d');
 
-  // Isto limpa qualquer rasto residual que o browser tenha guardado no buffer
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  let curr = 1000;
+  let curr = 1000; // Valor inicial base
   const pts = [1000, ...bets.map(b => curr += b.profit)];
   
-  const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-  gradient.addColorStop(0, 'rgba(0, 163, 255, 0.25)');
-  gradient.addColorStop(1, 'rgba(15, 23, 42, 0)');
-
-  chart = new Chart(ctx, {
+  new Chart(ctx, {
     type: 'line',
     data: {
-      labels: pts.map((_, i) => i === 0 ? 'Início' : `Aposta ${i}`),
+      labels: pts.map((_, i) => i === 0 ? 'Início' : `Ap. ${i}`),
       datasets: [{
         data: pts,
         borderColor: '#00a3ff',
         borderWidth: 3,
-        backgroundColor: gradient,
         fill: true,
-        tension: 0.3, // Menos tensão = linha mais estável e sem artefactos
-        pointRadius: 4,
-        pointBackgroundColor: '#00a3ff',
-        pointBorderColor: '#0f172a',
-        pointBorderWidth: 2
+        backgroundColor: 'rgba(0, 163, 255, 0.1)',
+        tension: 0.3,
+        pointRadius: 2
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: false, // OBRIGATÓRIO: Sem animação para evitar sobreposição visual
-      devicePixelRatio: 2, // Garante que a linha é nítida e não "borrada"
       plugins: { legend: { display: false } },
       scales: {
-        y: { 
-          grid: { color: 'rgba(255, 255, 255, 0.03)' },
-          ticks: { color: '#64748b', font: { size: 10 } }
-        },
-        x: { 
-          grid: { display: false },
-          ticks: { color: '#64748b', font: { size: 10 } }
-        }
+        y: { grid: { color: 'rgba(255, 255, 255, 0.03)' }, ticks: { color: '#64748b' } },
+        x: { grid: { display: false }, ticks: { color: '#64748b' } }
       }
     }
   });
