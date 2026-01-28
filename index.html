@@ -211,16 +211,30 @@ document.getElementById('bet-form').onsubmit = e => {
 function renderHistory() {
   const container = document.getElementById('bets-history');
   container.innerHTML = '';
+  
   bets.slice().reverse().forEach(b => {
     const card = document.createElement('div');
     card.className = `bet-card-new ${b.result}`;
     card.innerHTML = `
-      <div class="b-header"><strong>${b.event}</strong><span style="color: ${b.profit >= 0 ? 'var(--success)' : 'var(--danger)'}">${b.profit >= 0 ? '+' : ''}${b.profit.toFixed(2)}€</span></div>
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;">
-        <div><span style="display:block; font-size:10px; color:#64748b">Stake</span><strong>${b.stake}€</strong></div>
-        <div><span style="display:block; font-size:10px; color:#64748b">Odds</span><strong>${b.odds}</strong></div>
-        <div><span style="display:block; font-size:10px; color:#64748b">Mercado</span><strong>${b.market}</strong></div>
-      </div>`;
+      <div class="event-section">
+        <strong>${b.event}</strong>
+        <span>${b.market}</span>
+      </div>
+      <div class="data-column">
+        <span>Stake</span>
+        <b>€${b.stake}</b>
+      </div>
+      <div class="data-column">
+        <span>Odds</span>
+        <b>${b.odds}</b>
+      </div>
+      <div class="profit-column">
+        <span style="font-size: 10px; color: #475569; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 2px;">Resultado</span>
+        <b style="color: ${b.profit >= 0 ? 'var(--success)' : 'var(--danger)'}">
+          ${b.profit >= 0 ? '+' : ''}${b.profit.toFixed(2)}€
+          </b>
+          </div>
+    `;
     container.appendChild(card);
   });
 }
