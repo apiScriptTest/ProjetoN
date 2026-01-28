@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bancas | Bankroll Elite Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages/bancas.css">
+</head>
+<body>
+
+<div class="app-container">
+  <aside class="sidebar-new">
+    <div class="brand">
+      <div class="logo-icon">B</div>
+      <span>Bankroll<strong>Pro</strong></span>
+    </div>
+    <nav class="side-nav">
+      <div class="nav-group">
+        <label>PRINCIPAL</label>
+        <a href="index.html" class="nav-item">Dashboard</a>
+        <a href="performance.html" class="nav-item">Performance</a>
+      </div>
+      <div class="nav-group">
+        <label>GESTÃO</label>
+        <a href="bancas.html" class="nav-item active">Bancas</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-primary-glow" onclick="location.href='index.html'">+ Nova Aposta</button>
+    </div>
+  </aside>
+
+  <main class="main-viewport">
+    <header class="view-header">
+      <div class="header-content">
+        <h1>Gestão de Bancas</h1>
+        <p>Configura e monitoriza as tuas carteiras de investimento</p>
+      </div>
+      <button class="btn-primary-glow" id="btn-add-banca" style="width: auto; padding: 0 25px;">+ Adicionar Banca</button>
+    </header>
+
+    <div class="scroll-area">
+      <div id="bancas-grid" class="bancas-grid">
+        </div>
+    </div>
+  </main>
+</div>
+
+<div id="modal-banca" class="modal-overlay hidden">
+  <div class="modal-window" style="width: 350px;">
+    <h3 id="modal-title">Nova Banca</h3>
+    <input type="hidden" id="edit-banca-id"> 
+    
+    <div class="input-group">
+      <label>Nome da Carteira</label>
+      <input type="text" id="new-banca-name" placeholder="Ex: Banca Principal">
+    </div>
+    <div class="input-group">
+      <label>Saldo Atual (€)</label>
+      <input type="number" id="new-banca-balance" step="0.01" value="1000.00">
+    </div>
+    
+    <button class="btn-save-modal" onclick="salvarBanca()">Confirmar Alterações</button>
+    <button class="btn-edit" onclick="toggleModal(false)" style="margin-top: 10px; border: none; background: transparent;">Cancelar</button>
+  </div>
+</div>
+
+<script>
+  let bancas = JSON.parse(localStorage.getItem('bancas')) || [
+    { id: 1, nome: 'Banca Principal', saldo: 1000.00, ativa: true }
+  ];
+
+  function renderBancas() {
+    const grid = document.getElementById('bancas-grid');
+    grid.innerHTML = '';
+
+    bancas.forEach(b => {
+      // Alerta de Risco: Se a banca cair 50% do valor padrão sugerido (500€)
+      const isCritical = b.saldo < 500; 
+      const healthPercent = Math.min((b.saldo / 1000) * 100, 100);
+
+      const card = document.createElement('div');
+      card.className = `banca-card ${b.ativa ? 'active' : ''}`;
+      card.innerHTML = `
+        <div class="banca-header">
+          <h3>${b.nome}</h3>
+          ${b.ativa ? '<span class="status-badge">ATIVA</span>' : ''}
+        </div>
+        <div class="banca-body">
+          <span style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase;">Saldo Disponível</span>
+          <h2 class="balance">€${parseFloat(b.saldo).toFixed(2)}</h2>
+          
+          <div class="risk-bar-container">
+            <div class="risk-fill ${isCritical ? 'risk-warning' : ''}" style="width: ${healthPercent}%"></div>
+          </div>
+          <p style="font-size: 10px; color: ${isCritical ? 'var(--danger)' : '#64748b'}; margin: 0; font-weight: 600;">
+            ${isCritical ? '⚠️ RISCO DE CARTÃO VERMELHO' : 'MODELO ESTATÍSTICO ESTÁVEL'}
+          </p>
+        </div>
+        <div class="banca-actions" style="display: flex; gap: 10px; margin-top: 15px;">
+          <button class="btn-config" style="flex: 2; margin-top: 0;" onclick="selecionarBanca(${b.id})">
+            ${b.ativa ? 'Em Uso' : 'Selecionar'}
+          </button>
+          <button class="btn-edit-small" style="flex: 1;" onclick="abrirEditor(${b.id})">Editar</button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // Lógica para Ativar Banca
+  function selecionarBanca(id) {
+    bancas.forEach(b => b.ativa = (b.id === id));
+    const ativa = bancas.find(b => b.ativa);
+    
+    localStorage.setItem('bankroll', ativa.saldo);
+    localStorage.setItem('bancas', JSON.stringify(bancas));
+    renderBancas();
+  }
+
+  // Lógica para abrir Editor
+  function abrirEditor(id) {
+    const banca = bancas.find(b => b.id === id);
+    document.getElementById('modal-title').innerText = "Editar Banca";
+    document.getElementById('edit-banca-id').value = banca.id;
+    document.getElementById('new-banca-name').value = banca.nome;
+    document.getElementById('new-banca-balance').value = banca.saldo;
+    toggleModal(true);
+  }
+
+  // Abrir Modal para Nova Banca
+  document.getElementById('btn-add-banca').onclick = () => {
+    document.getElementById('modal-title').innerText = "Nova Banca";
+    document.getElementById('edit-banca-id').value = ""; 
+    document.getElementById('new-banca-name').value = "";
+    document.getElementById('new-banca-balance').value = "1000.00";
+    toggleModal(true);
+  };
+
+  function toggleModal(show) {
+    const modal = document.getElementById('modal-banca');
+    show ? modal.classList.remove('hidden') : modal.classList.add('hidden');
+  }
+
+  function salvarBanca() {
+    const id = document.getElementById('edit-banca-id').value;
+    const nome = document.getElementById('new-banca-name').value;
+    const saldo = parseFloat(document.getElementById('new-banca-balance').value);
+
+    if (nome && !isNaN(saldo)) {
+      if (id) {
+        // Editar existente
+        const index = bancas.findIndex(b => b.id == id);
+        bancas[index].nome = nome;
+        bancas[index].saldo = saldo;
+        if(bancas[index].ativa) localStorage.setItem('bankroll', saldo);
+      } else {
+        // Criar nova
+        bancas.push({ id: Date.now(), nome, saldo, ativa: false });
+      }
+
+      localStorage.setItem('bancas', JSON.stringify(bancas));
+      renderBancas();
+      toggleModal(false);
+    }
+  }
+
+  renderBancas();
+</script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+/* 1. Reset e Grid (Onde o layout se organiza) */
+.bancas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    padding: 24px 0;
+}
+
+/* 2. O Card (Substitui a versão antiga) */
+.banca-card {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.4), rgba(15, 23, 42, 0.6));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 28px;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.banca-card:hover {
+    transform: translateY(-5px);
+    background: rgba(30, 41, 59, 0.6);
+    border-color: var(--accent);
+}
+
+.banca-card.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(0, 163, 255, 0.15);
+}
+
+/* 3. Tipografia e Valores (Estilo Terminal Financeiro) */
+.banca-card h3 {
+    color: #94a3b8;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.banca-card .balance {
+    color: #fff;
+    font-size: 32px;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* 4. Indicadores de Risco (Novidade para o Cartão Vermelho) */
+.risk-bar-container {
+    height: 6px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    margin: 15px 0 5px 0;
+}
+
+.risk-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 10px;
+    transition: width 1s ease;
+}
+
+.risk-warning { 
+    background: var(--danger) !important; 
+    box-shadow: 0 0 10px var(--danger); 
+}
+
+/* 5. Botões e Status */
+.status-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.btn-config {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.btn-config:hover {
+    background: var(--accent);
+    color: #000;
+}
+
+.banca-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-edit-small {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: 0.2s;
+    flex: 1;
+}
+
+.btn-edit-small:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
