@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bankroll Manager</title>
-
-  <!-- CSS -->
+  <title>Bankroll Elite Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/layout.css">
   <link rel="stylesheet" href="assets/css/components.css">
@@ -14,331 +13,275 @@
 </head>
 <body>
 
-<div class="app">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <h1 class="logo">Bankroll</h1>
-
-    <button id="open-bet-modal" class="btn btn-primary add-bet-btn">
-      + ADICIONAR APOSTA
-    </button>
-
-    <nav class="nav">
-      <a href="#" class="nav-link active">Dashboard</a>
+<div class="app-container">
+  <aside class="sidebar-new">
+    <div class="brand">
+      <div class="logo-icon">B</div>
+      <span>Bankroll<strong>Pro</strong></span>
+    </div>
+    
+    <nav class="side-nav">
+      <div class="nav-group">
+        <label>PRINCIPAL</label>
+        <a href="#" class="nav-item active">Dashboard</a>
+        <a href="#" class="nav-item">Performance</a>
+      </div>
+      <div class="nav-group">
+        <label>GESTÃO</label>
+        <a href="#" class="nav-item">Bancas</a>
+      </div>
     </nav>
+
+    <div class="sidebar-footer">
+      <button id="open-bet-modal" class="btn-primary-glow">+ Nova Aposta</button>
+    </div>
   </aside>
 
-  <!-- MAIN -->
-  <main class="main">
-
-    <header class="header">
-      <h2>Dashboard</h2>
-      <button class="btn btn-ghost" id="reset-btn">Reset</button>
+  <main class="main-viewport">
+    <header class="view-header">
+      <div class="header-content">
+        <h1>Dashboard</h1>
+        <p>Análise de rendimento em tempo real</p>
+      </div>
+      <button id="reset-btn" class="btn-reset-ui">Limpar Dados</button>
     </header>
 
-    <!-- STATS -->
-    <section class="stats">
-      <div class="card stat">
-        <span class="stat-label">Banca Atual</span>
-        <strong class="stat-value bank" id="bank-value">€0.00</strong>
-      </div>
+    <div class="scroll-area">
+      <section class="top-metrics">
+        <div class="metric-card">
+          <span>Banca Total</span>
+          <h2 id="bank-value">€0.00</h2>
+        </div>
+        <div class="metric-card">
+          <span>Lucro Líquido</span>
+          <h2 id="profit-value">€0.00</h2>
+        </div>
+        <div class="metric-card">
+          <span>ROI</span>
+          <h2 id="roi-value">0%</h2>
+        </div>
+      </section>
 
-      <div class="card stat">
-        <span class="stat-label">Lucro</span>
-        <strong class="stat-value profit" id="profit-value">€0.00</strong>
-      </div>
-
-      <div class="card stat">
-        <span class="stat-label">ROI</span>
-        <strong class="stat-value roi" id="roi-value">0%</strong>
-      </div>
-    </section>
-
-    <!-- CONTENT -->
-    <section class="content">
-
-      <!-- GRÁFICO -->
-      <div class="card">
-        <h3>Evolução da Banca</h3>
-        <canvas id="bank-chart" class="chart-placeholder"></canvas>
-      </div>
-
-      <!-- HISTÓRICO -->
-      <div class="card bets-history-card">
-        <h3>Histórico de Apostas</h3>
+      <section class="chart-box">
+        <div class="canvas-holder">
+          <canvas id="bank-chart"></canvas>
+        </div>
+      </section>
+      
+      <section class="history-section">
+        <h3>Histórico Recente</h3>
         <div id="bets-history"></div>
-      </div>
-
-    </section>
-
+      </section>
+    </div>
   </main>
+
+  <aside class="right-panel">
+    <div class="panel-card">
+      <h3>Insights Rápidos</h3>
+      <div class="insight-list">
+        <div class="mini-stat"><span>Apostado</span><strong id="total-stake">€0.00</strong></div>
+        <div class="mini-stat"><span>Ganhou</span><strong id="total-won" class="text-success">€0.00</strong></div>
+        <div class="mini-stat"><span>Perdeu</span><strong id="total-lost" class="text-danger">€0.00</strong></div>
+        <div class="mini-stat"><span>Lucro</span><strong id="total-profit-in">€0.00</strong></div>
+        <div class="mini-stat"><span>Maior Green</span><strong id="max-green" class="text-success">€0.00</strong></div>
+        <div class="mini-stat"><span>Maior Red</span><strong id="max-red" class="text-danger">€0.00</strong></div>
+      </div>
+    </div>
+
+    <div class="panel-card tips">
+      <h4>Dica do Sistema</h4>
+      <p>Um "Cartão Vermelho" é o cisne negro que destrói qualquer modelo estatístico. Gere a tua stake com cautela.</p>
+    </div>
+  </aside>
 </div>
 
-<!-- MODAL -->
-<div id="bet-modal" class="modal hidden">
-  <div class="modal-content">
-    <header class="modal-header">
-      <h3>Adicionar Aposta 🎯</h3>
-      <button id="close-bet-modal" class="btn btn-ghost">X</button>
-    </header>
-
+<div id="bet-modal" class="modal-overlay hidden">
+  <div class="modal-window">
+    <div class="modal-header">
+      <h3>Nova Entrada</h3>
+      <button id="close-bet-modal" class="btn-close">×</button>
+    </div>
     <form id="bet-form">
-
-      <div class="form-group">
-        <label class="label">Jogo</label>
-        <input class="input" type="text" id="event" placeholder="Ex: Benfica vs Porto" required>
+      <div class="input-group">
+        <label>Evento</label>
+        <input type="text" id="event" placeholder="Ex: Real Madrid vs City" required>
+      </div>
+      
+      <div class="input-row">
+        <div class="input-group">
+          <label>Stake (€)</label>
+          <div class="custom-number-input">
+            <button type="button" class="spin-btn" onclick="stepValue('stake', -5)">-</button>
+            <input type="number" step="0.01" id="stake" value="0" required>
+            <button type="button" class="spin-btn" onclick="stepValue('stake', 5)">+</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Odds</label>
+          <div class="custom-number-input">
+            <button type="button" class="spin-btn" onclick="stepValue('odds', -0.10)">-</button>
+            <input type="number" step="0.01" id="odds" value="1.00" required>
+            <button type="button" class="spin-btn" onclick="stepValue('odds', 0.10)">+</button>
+          </div>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label class="label">Stake (€)</label>
-        <input class="input" type="number" step="0.01" id="stake" required>
+      <div class="input-group">
+        <label>Mercado</label>
+        <input type="text" id="market" placeholder="Ambas Marcam" required>
       </div>
-
-      <div class="form-group">
-        <label class="label">Odds</label>
-        <input class="input" type="number" step="0.01" id="odds" required>
-      </div>
-
-      <div class="form-group">
-        <label class="label">Mercado</label>
-        <input class="input" type="text" id="market" placeholder="Over 1.5" required>
-      </div>
-
-      <div class="form-group">
-        <label class="label">Casa de Aposta</label>
-        <input class="input" type="text" id="bookmaker" placeholder="Bwin" required>
-      </div>
-
-      <div class="form-group">
-        <label class="label">Resultado</label>
-        <select class="input" id="result">
-          <option value="win">Win</option>
-          <option value="loss">Loss</option>
-          <option value="void">Void</option>
+      <div class="input-group">
+        <label>Resultado</label>
+        <select id="result">
+          <option value="win">Win (Green)</option>
+          <option value="loss">Loss (Red)</option>
+          <option value="void">Void (Anulada)</option>
         </select>
       </div>
-
-      <button type="submit" class="btn btn-primary">Guardar Aposta</button>
+      <button type="submit" class="btn-save-modal">Confirmar Aposta</button>
     </form>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-/* ======================
-   STATE
-====================== */
 let bankroll = Number(localStorage.getItem('bankroll')) || 1000;
 let bets = JSON.parse(localStorage.getItem('bets')) || [];
 let chart;
 
-/* ======================
-   ELEMENTOS
-====================== */
 const modal = document.getElementById('bet-modal');
-const eventInput = document.getElementById('event');
-const stakeInput = document.getElementById('stake');
-const oddsInput = document.getElementById('odds');
-const marketInput = document.getElementById('market');
-const bookmakerInput = document.getElementById('bookmaker');
-const resultSelect = document.getElementById('result');
-
-/* ======================
-   INIT
-====================== */
-updateStats();
-renderChart();
-renderHistory();
-
-/* ======================
-   MODAL
-====================== */
 document.getElementById('open-bet-modal').onclick = () => modal.classList.remove('hidden');
 document.getElementById('close-bet-modal').onclick = () => modal.classList.add('hidden');
-modal.onclick = e => { if (e.target === modal) modal.classList.add('hidden'); };
 
-/* ======================
-   RESET
-====================== */
-document.getElementById('reset-btn').onclick = () => {
-  if (!confirm('Resetar banca e apostas?')) return;
-  bankroll = 1000;
-  bets = [];
-  saveData();
-  updateStats();
-  renderChart();
+// FUNÇÃO PARA AS NOVAS SETINHAS
+function stepValue(id, step) {
+  const input = document.getElementById(id);
+  let val = parseFloat(input.value) || 0;
+  input.value = (val + step).toFixed(2);
+}
+
+function updateUI() {
+  const totalProfit = bets.reduce((s, b) => s + b.profit, 0);
+  const totalStake = bets.reduce((s, b) => s + b.stake, 0);
+  const totalWon = bets.filter(b => b.profit > 0).reduce((s, b) => s + b.profit, 0);
+  const totalLost = Math.abs(bets.filter(b => b.profit < 0).reduce((s, b) => s + b.profit, 0));
+  const roi = totalStake ? ((totalProfit / totalStake) * 100).toFixed(2) : 0;
+  
+  document.getElementById('bank-value').textContent = `€${bankroll.toFixed(2)}`;
+  document.getElementById('profit-value').textContent = `${totalProfit >= 0 ? '+' : ''}€${totalProfit.toFixed(2)}`;
+  document.getElementById('profit-value').style.color = totalProfit >= 0 ? 'var(--success)' : 'var(--danger)';
+  document.getElementById('roi-value').textContent = `${roi}%`;
+  
+  document.getElementById('total-stake').textContent = `€${totalStake.toFixed(2)}`;
+  document.getElementById('total-won').textContent = `€${totalWon.toFixed(2)}`;
+  document.getElementById('total-lost').textContent = `€${totalLost.toFixed(2)}`;
+  document.getElementById('total-profit-in').textContent = `€${totalProfit.toFixed(2)}`;
+  document.getElementById('total-profit-in').style.color = totalProfit >= 0 ? 'var(--success)' : 'var(--danger)';
+  
+  const profits = bets.map(b => b.profit);
+  document.getElementById('max-green').textContent = `€${profits.length ? Math.max(...profits, 0).toFixed(2) : '0.00'}`;
+  document.getElementById('max-red').textContent = `€${profits.length ? Math.min(...profits, 0).toFixed(2) : '0.00'}`;
+
   renderHistory();
-};
+  renderChart();
+}
 
-/* ======================
-   ADD BET
-====================== */
 document.getElementById('bet-form').onsubmit = e => {
   e.preventDefault();
+  const stake = Number(document.getElementById('stake').value);
+  const odds = Number(document.getElementById('odds').value);
+  const result = document.getElementById('result').value;
+  let profit = result === 'win' ? stake * (odds - 1) : (result === 'loss' ? -stake : 0);
 
-  const event = eventInput.value.trim();
-  const stake = Number(stakeInput.value);
-  const odds = Number(oddsInput.value);
-  const market = marketInput.value.trim();
-  const bookmaker = bookmakerInput.value.trim();
-  const result = resultSelect.value;
-
-  if (!event) { alert('Insira o jogo.'); return; }
-  if (!stake || stake <= 0 || odds < 1.01) { alert('Stake ou odds inválidas'); return; }
-
-  let profit = 0;
-  if (result === 'win') profit = stake * (odds - 1);
-  if (result === 'loss') profit = -stake;
-
-  bets.push({
-    stake,
-    odds,
-    market,
-    bookmaker,
-    result,
-    profit,
-    type: 'Simples',
-    sport: 'Futebol',
-    event,
-    date: new Date().toISOString()
+  bets.push({ 
+    event: document.getElementById('event').value, 
+    stake, odds, profit, result, 
+    market: document.getElementById('market').value, 
+    date: new Date().toISOString() 
   });
-
+  
   bankroll += profit;
-
-  saveData();
-  updateStats();
-  renderChart();
-  renderHistory();
-
+  localStorage.setItem('bankroll', bankroll);
+  localStorage.setItem('bets', JSON.stringify(bets));
+  updateUI();
   e.target.reset();
   modal.classList.add('hidden');
 };
 
-/* ======================
-   STATS
-====================== */
-function updateStats() {
-  const totalProfit = bets.reduce((s,b)=>s+b.profit,0);
-  const totalStake = bets.reduce((s,b)=>s+b.stake,0);
-  const roi = totalStake ? ((totalProfit/totalStake)*100).toFixed(2) : 0;
-
-  document.getElementById('bank-value').textContent = `€${bankroll.toFixed(2)}`;
-  document.getElementById('profit-value').textContent =
-    `${totalProfit>=0?'+':''}€${totalProfit.toFixed(2)}`;
-  document.getElementById('roi-value').textContent = `${roi}%`;
-}
-
-/* ======================
-   HISTORY
-====================== */
 function renderHistory() {
   const container = document.getElementById('bets-history');
   container.innerHTML = '';
-
-  if (!bets.length) {
-    container.innerHTML = '<p style="color:var(--text-secondary)">Sem apostas.</p>';
-    return;
-  }
-
-  bets.slice().reverse().forEach((b, index) => {
-    const time = new Date(b.date).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-
+  bets.slice().reverse().forEach(b => {
     const card = document.createElement('div');
-    card.className = `bet-card ${b.result}`;
-
+    card.className = `bet-card-new ${b.result}`;
     card.innerHTML = `
-      <div class="bet-actions">
-        <button class="bet-action-btn" onclick="editBet(${index})">✏️</button>
-        <button class="bet-action-btn" onclick="deleteBet(${index})">🗑️</button>
-      </div>
-
-      <div class="bet-top">
-        <div class="bet-meta">
-          <span>Horário: <strong>${time}</strong></span>
-          <span>Tipo de Aposta: <strong>${b.type}</strong></span>
-          <span>Casa de Apostas: <strong>${b.bookmaker}</strong></span>
-        </div>
-        <div class="bet-profit ${b.result}">
-          <strong>${b.profit >= 0 ? '+' : '-'}€${Math.abs(b.profit).toFixed(2)}</strong>
-        </div>
-      </div>
-
-      <div class="bet-event"><strong>Jogo: ${b.event}</strong></div>
-      <div class="bet-market"><strong>Mercado: ${b.market}</strong></div>
-
-      <div class="bet-grid">
-        <div class="bet-box"><strong>${b.odds.toFixed(2)}</strong> Cotação</div>
-        <div class="bet-box"><strong>€${b.stake.toFixed(2)}</strong> Valor</div>
-        <div class="bet-box"><strong>€${(b.stake * b.odds).toFixed(2)}</strong> Ganho</div>
-        <div class="bet-box"><strong>€${b.profit.toFixed(2)}</strong> Lucro</div>
-      </div>
-    `;
-
+      <div class="b-header"><strong>${b.event}</strong><span style="color: ${b.profit >= 0 ? 'var(--success)' : 'var(--danger)'}">${b.profit >= 0 ? '+' : ''}${b.profit.toFixed(2)}€</span></div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;">
+        <div><span style="display:block; font-size:10px; color:#64748b">Stake</span><strong>${b.stake}€</strong></div>
+        <div><span style="display:block; font-size:10px; color:#64748b">Odds</span><strong>${b.odds}</strong></div>
+        <div><span style="display:block; font-size:10px; color:#64748b">Mercado</span><strong>${b.market}</strong></div>
+      </div>`;
     container.appendChild(card);
   });
 }
 
-/* ======================
-   EDIT / DELETE
-====================== */
-function deleteBet(index) {
-  if (!confirm('Apagar aposta?')) return;
-  bets.splice(index,1);
-  saveData();
-  updateStats();
-  renderChart();
-  renderHistory();
-}
-
-function editBet(index) {
-  const b = bets[index];
-  eventInput.value = b.event;
-  stakeInput.value = b.stake;
-  oddsInput.value = b.odds;
-  marketInput.value = b.market;
-  bookmakerInput.value = b.bookmaker;
-  resultSelect.value = b.result;
-  deleteBet(index);
-  modal.classList.remove('hidden');
-}
-
-/* ======================
-   STORAGE
-====================== */
-function saveData() {
-  localStorage.setItem('bankroll', bankroll);
-  localStorage.setItem('bets', JSON.stringify(bets));
-}
-
-/* ======================
-   CHART
-====================== */
 function renderChart() {
-  const ctx = document.getElementById('bank-chart').getContext('2d');
-  if (chart) chart.destroy();
+  const container = document.querySelector('.canvas-holder');
+  
+  container.innerHTML = '<canvas id="bank-chart"></canvas>';
+  
+  const canvas = document.getElementById('bank-chart');
+  const ctx = canvas.getContext('2d');
 
-  let value = 1000;
-  const data = bets.map(b => value += b.profit);
+  // Isto limpa qualquer rasto residual que o browser tenha guardado no buffer
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  chart = new Chart(ctx,{
-    type:'line',
-    data:{
-      labels:data.map((_,i)=>`Aposta ${i+1}`),
-      datasets:[{
-        data,
-        fill:true,
-        borderColor:'#38bdf8',
-        backgroundColor:'rgba(56,189,248,0.2)',
-        tension:0.3
+  let curr = 1000;
+  const pts = [1000, ...bets.map(b => curr += b.profit)];
+  
+  const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+  gradient.addColorStop(0, 'rgba(0, 163, 255, 0.25)');
+  gradient.addColorStop(1, 'rgba(15, 23, 42, 0)');
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: pts.map((_, i) => i === 0 ? 'Início' : `Aposta ${i}`),
+      datasets: [{
+        data: pts,
+        borderColor: '#00a3ff',
+        borderWidth: 3,
+        backgroundColor: gradient,
+        fill: true,
+        tension: 0.3, // Menos tensão = linha mais estável e sem artefactos
+        pointRadius: 4,
+        pointBackgroundColor: '#00a3ff',
+        pointBorderColor: '#0f172a',
+        pointBorderWidth: 2
       }]
     },
-    options:{
-      responsive:true,
-      plugins:{ legend:{ display:false } }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false, // OBRIGATÓRIO: Sem animação para evitar sobreposição visual
+      devicePixelRatio: 2, // Garante que a linha é nítida e não "borrada"
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { 
+          grid: { color: 'rgba(255, 255, 255, 0.03)' },
+          ticks: { color: '#64748b', font: { size: 10 } }
+        },
+        x: { 
+          grid: { display: false },
+          ticks: { color: '#64748b', font: { size: 10 } }
+        }
+      }
     }
   });
 }
+
+document.getElementById('reset-btn').onclick = () => { if(confirm('Eliminar todos os dados?')) { localStorage.clear(); location.reload(); }};
+updateUI();
 </script>
 </body>
 </html>

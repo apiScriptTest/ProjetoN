@@ -1,41 +1,80 @@
-/* Estrutura Geral */
-.app {
+/* layout.css */
+
+/* SCROLLBAR CUSTOMIZADA */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0b1120; }
+::-webkit-scrollbar-thumb { 
+  background: rgba(255, 255, 255, 0.1); 
+  border-radius: 10px; 
+}
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+.app-container {
   display: grid;
-  grid-template-columns: 240px 1fr;
-  min-height: 100vh;
-  background-color: #2d3339; /* O fundo escuro da tua imagem */
+  grid-template-columns: 260px 1fr 320px; /* Ajustado para bater com o teu right-panel */
+  height: 100vh;
+  width: 100vw;
+  background-color: #0b1120;
+  overflow: hidden;
 }
 
-.sidebar {
-  background-color: #1e252b;
-  padding: 24px;
+.sidebar-new {
+  background-color: #0f172a;
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
   border-right: 1px solid rgba(255,255,255,0.05);
 }
 
-.main {
-  padding: 32px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px; /* Espaço uniforme entre secções */
+.main-viewport {
+  overflow-y: auto;
+  padding: 40px;
+  background-color: #0b1120;
+  scrollbar-gutter: stable;
 }
 
-/* ALINHAMENTO DOS STATS LADO A LADO */
-.stats {
+.right-panel {
+  background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+  padding: 40px 24px !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
-  flex-direction: row; /* Força a linha */
+  flex-direction: column;
+  align-items: center; 
+  gap: 32px;
+  width: 320px;
+  overflow-y: auto;
+}
+
+.scroll-area {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.view-header {
+  display: flex;
   justify-content: space-between;
-  gap: 20px;
-  width: 100%;
+  align-items: flex-start;
+  margin-bottom: 30px;
 }
 
-.stats .card.stat {
-  flex: 1; /* Divide o espaço igualmente por 3 */
-  min-width: 0; /* Evita quebras de layout */
-}
-
-/* Secção de Conteúdo (Gráfico e Histórico) */
-.content {
+/* OVERLAY DO MODAL COM DESFOQUE */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(10px); /* A magia do vidro */
   display: flex;
-  flex-direction: column;
-  gap: 24px;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: all 0.3s ease;
+}
+
+.modal-overlay.hidden {
+  display: none;
+  opacity: 0;
 }

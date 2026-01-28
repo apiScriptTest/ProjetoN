@@ -1,23 +1,18 @@
 :root {
-  --bg: #2d3339;
-  --sidebar-bg: #1e252b;
-  --card-bg: #ffffff;
-  
-  /* Cores de Texto - O segredo está no cinza */
-  --text-main: #1e293b;   /* Quase preto para valores */
-  --text-label: #64748b;  /* Cinza para labels */
-  --text-muted: #94a3b8;  /* Cinza muito claro para detalhes */
-
-  /* Cores de Ação */
-  --accent: #4ade80; /* Verde esmeralda da referência */
-  --danger: #ef4444; 
+  --bg-app: #0f172a;       /* Dark Navy */
+  --bg-card: #1e293b;      /* Slate */
+  --accent: #38bdf8;       /* Sky Blue */
+  --success: #10b981;
+  --danger: #f43f5e;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'Inter', -apple-system, sans-serif;
-  background-color: var(--bg);
-  color: #fff;
-  -webkit-font-smoothing: antialiased;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  font-family: 'Inter', sans-serif; 
+  background: var(--bg-app); 
+  color: var(--text-primary);
+  overflow-x: hidden;
 }
+.hidden { display: none !important; }
