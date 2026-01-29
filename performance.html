@@ -43,6 +43,14 @@
           <h1>Análise de Performance</h1>
           <p>Métricas de consistência e inteligência de dados</p>
         </div>
+        <div class="filter-wrapper">
+          <select id="period-filter" onchange="runPerformance()" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;">
+            <option value="all">Todo o Histórico</option>
+            <option value="7">Últimos 7 dias</option>
+            <option value="30">Últimos 30 dias</option>
+            <option value="month">Mês Atual</option>
+          </select>
+        </div>
       </header>
 
       <section class="top-metrics" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
@@ -52,7 +60,7 @@
         </div>
 
         <div class="metric-card">
-          <span>ROI Total</span>
+          <span>ROI do Período</span>
           <h2 id="total-roi">0%</h2>
         </div>
 
@@ -66,7 +74,7 @@
 
         <section class="chart-box-large">
           <label style="font-size:11px;text-transform:uppercase;color:#64748b;font-weight:800;">
-            Evolução de ROI (%)
+            Evolução de ROI (%) no Período
           </label>
 
           <div class="chart-container">
@@ -114,7 +122,7 @@
     <div class="panel-card tips">
       <h4>Dica do Sistema</h4>
       <p>
-        Um <strong>🟥 Cartão Vermelho</strong> é o cisne negro que destrói qualquer modelo estatístico. [cite: 2026-01-20]
+        Um <strong>🟥 Cartão Vermelho</strong> é o cisne negro que destrói qualquer modelo estatístico [cite: 2026-01-20].
         Gere a tua stake com cautela.
       </p>
     </div>
@@ -125,46 +133,84 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-const bets = JSON.parse(localStorage.getItem('bets')) || [];
-const initialBank = Number(localStorage.getItem('bankroll_base')) || 1000;
+let roiChartInstance = null;
 
 function runPerformance() {
-  if (!bets.length) return;
+  const allBets = JSON.parse(localStorage.getItem('bets')) || [];
+  const initialBank = Number(localStorage.getItem('bankroll_base')) || 1000;
+  const filterValue = document.getElementById('period-filter').value;
+  
+  // Data de referência: Fim do dia de hoje
+  const now = new Date();
+  now.setHours(23, 59, 59, 999);
+
+  // 1. FILTRAGEM POR DATA CORRIGIDA
+  const filteredBets = allBets.filter(b => {
+    if (filterValue === 'all') return true;
+    
+    // Converte a string "YYYY-MM-DD" para objeto Date forçando hora zero local
+    const betDate = new Date(b.date + 'T00:00:00');
+    
+    if (filterValue === 'month') {
+      return betDate.getMonth() === now.getMonth() && betDate.getFullYear() === now.getFullYear();
+    }
+
+    const diffTime = now - betDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (filterValue === '7') return diffDays >= 0 && diffDays < 7;
+    if (filterValue === '30') return diffDays >= 0 && diffDays < 30;
+    
+    return true;
+  });
+
+  // Reset visual se não houver dados
+  if (!filteredBets.length) {
+    document.getElementById('total-roi').innerText = "0%";
+    document.getElementById('profit-factor').innerText = "0.00";
+    if (roiChartInstance) roiChartInstance.destroy();
+    return;
+  }
 
   let wins = 0;
   let losses = 0;
   let currentProfit = 0;
   let roiPoints = [0];
+  let labels = ['Início'];
   let markets = {};
 
-  bets.forEach(b => {
+  filteredBets.forEach(b => {
     const p = Number(b.profit) || 0;
     if (p > 0) wins += p;
     else losses += Math.abs(p);
 
     currentProfit += p;
     roiPoints.push(((currentProfit / initialBank) * 100).toFixed(2));
+    
+    // Label formatada: Dia/Mês (Ex: 29/1)
+    const d = new Date(b.date + 'T00:00:00');
+    labels.push(`${d.getDate()}/${d.getMonth() + 1}`);
 
     if (!markets[b.market]) markets[b.market] = { w: 0, t: 0 };
     markets[b.market].t++;
     if (b.result === 'win') markets[b.market].w++;
   });
 
-  /* TOP METRICS COM CORES DINÂMICAS */
+  // 2. ATUALIZAR MÉTRICAS
   const pfValue = (wins / (losses || 1)).toFixed(2);
   const pfElem = document.getElementById('profit-factor');
   pfElem.innerText = pfValue;
-  pfElem.style.color = pfValue < 1 ? '#f43f5e' : '#22c55e'; // Vermelho se PF < 1
+  pfElem.style.color = pfValue < 1 ? '#f43f5e' : '#22c55e';
 
   const lastRoi = roiPoints.at(-1);
   const roiElem = document.getElementById('total-roi');
   roiElem.innerText = lastRoi + '%';
-  roiElem.style.color = lastRoi < 0 ? '#f43f5e' : '#00a3ff'; // Vermelho se prejuízo
+  roiElem.style.color = lastRoi < 0 ? '#f43f5e' : '#00a3ff';
 
   document.getElementById('current-balance').innerText = 
     `€${(Number(localStorage.getItem('bankroll')) || initialBank).toFixed(2)}`;
 
-  /* RANKING */
+  // 3. RANKING DE MERCADOS
   const rankCont = document.getElementById('market-leaderboard');
   rankCont.innerHTML = '';
   Object.entries(markets)
@@ -178,20 +224,23 @@ function runPerformance() {
         </div>`;
     });
 
-  /* CHART - REFINADO COM GRADIENTE */
-  new Chart(document.getElementById('roiChart'), {
+  // 4. CHART (RE-RENDERIZAR)
+  if (roiChartInstance) roiChartInstance.destroy();
+  
+  const ctx = document.getElementById('roiChart').getContext('2d');
+  roiChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: roiPoints.map((_, i) => i),
+      labels: labels,
       datasets: [{
         data: roiPoints,
         borderWidth: 3,
-        borderColor: lastRoi < 0 ? '#f43f5e' : '#00a3ff', // Linha segue o estado do ROI
+        borderColor: lastRoi < 0 ? '#f43f5e' : '#00a3ff',
         tension: 0.45,
-        pointRadius: 0,
+        pointRadius: 2,
         fill: true,
-        backgroundColor: ctx => {
-          const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 400);
+        backgroundColor: context => {
+          const g = context.chart.ctx.createLinearGradient(0, 0, 0, 400);
           const color = lastRoi < 0 ? '244, 63, 94' : '0, 163, 255';
           g.addColorStop(0, `rgba(${color}, 0.2)`);
           g.addColorStop(1, `rgba(${color}, 0)`);
@@ -204,27 +253,23 @@ function runPerformance() {
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } },
+        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } },
         y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b', font: { size: 10 } } }
       }
     }
   });
 
-  /* CONSISTENCY */
-  const rate = Math.round((bets.filter(b => b.result === 'win').length / bets.length) * 100);
+  // 5. CONSISTÊNCIA E VOLATILIDADE
+  const rate = Math.round((filteredBets.filter(b => b.result === 'win').length / filteredBets.length) * 100);
   document.getElementById('meter-consistency').style.width = rate + '%';
   document.getElementById('meter-consistency').style.background = rate < 50 ? '#f43f5e' : '#00a3ff';
   document.getElementById('consistency-text').innerText = `${rate}% de Taxa de Acerto`;
 
-  /* VOLATILITY */
   const vol = document.getElementById('vol-level');
-  const pulse = document.getElementById('vol-pulse');
-  const isHigh = losses > wins; // Alerta se as perdas superarem ganhos brutos
-
+  const isHigh = losses > wins;
   vol.innerText = isHigh ? 'ALTA' : 'ESTÁVEL';
   vol.style.color = isHigh ? '#f43f5e' : '#00a3ff';
-  pulse.style.background = isHigh ? '#f43f5e' : '#00a3ff';
-  pulse.style.color = pulse.style.background; // Necessário para a animação do CSS ::after
+  document.getElementById('vol-pulse').style.background = isHigh ? '#f43f5e' : '#00a3ff';
 }
 
 runPerformance();
