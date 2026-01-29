@@ -1,144 +1,232 @@
-/* ESTRUTURA RÍGIDA DE PERFORMANCE */
-.performance-layout {
-    display: grid;
-    grid-template-columns: 1fr 320px; /* Centro flexível | Direita fixa */
-    gap: 32px;
-    align-items: start;
+/* ================================
+   PERFORMANCE – VISUAL REFINADO
+================================ */
+
+/* ---------- TOP METRICS ---------- */
+.top-metrics {
+  margin-bottom: 32px;
 }
 
-/* MÉTRICAS DE TOPO */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-bottom: 32px;
+.metric-card {
+  position: relative;
+  padding: 26px 28px;
+  border-radius: 22px;
+  background: linear-gradient(
+    165deg,
+    rgba(30, 41, 59, 0.9),
+    rgba(15, 23, 42, 0.95)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
 }
 
-.mini-stat {
-    background: linear-gradient(145deg, #1e293b, #0f172a);
-    padding: 24px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s;
+.metric-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    600px circle at top left,
+    rgba(0, 163, 255, 0.08),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
-.mini-stat span {
-    display: block;
-    font-size: 11px;
-    color: #64748b;
-    text-transform: uppercase;
-    font-weight: 800;
-    letter-spacing: 1px;
-    margin-bottom: 12px;
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.mini-stat strong {
-    font-size: 28px;
-    color: #f8fafc;
-    font-family: 'JetBrains Mono', monospace;
+.metric-card:hover::after {
+  opacity: 1;
 }
 
-/* CARDS COM PROFUNDIDADE (GLASSMORPHISM) */
-.chart-container-large, .insight-card, .ranking-card {
-    background: linear-gradient(165deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.8));
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 24px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+.metric-card span {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #94a3b8;
+  margin-bottom: 14px;
 }
 
-.chart-container-large {
-    padding: 32px;
-    height: 480px;
-    margin-bottom: 24px;
+.metric-card h2 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 34px;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1;
 }
 
-/* INSIGHTS E QUALIDADE */
-.quality-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+/* Cores semânticas automáticas */
+#profit-factor {
+  color: #22c55e;
+}
+
+#total-roi {
+  color: #00a3ff;
+}
+
+#current-balance {
+  color: #e5e7eb;
+}
+
+/* ---------- LAYOUT PRINCIPAL ---------- */
+.performance-flow {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 28px;
+  align-items: start;
+}
+
+/* ---------- GRÁFICO ---------- */
+.chart-box-large {
+  background: linear-gradient(
+    165deg,
+    rgba(30, 41, 59, 0.55),
+    rgba(15, 23, 42, 0.9)
+  );
+  border-radius: 26px;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+}
+
+.chart-container {
+  position: relative;
+  height: 380px;
+  margin-top: 16px;
+}
+
+/* ---------- SUPPORT METRICS ---------- */
+.support-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .insight-card {
-    padding: 24px;
+  background: linear-gradient(
+    160deg,
+    rgba(30, 41, 59, 0.7),
+    rgba(15, 23, 42, 0.95)
+  );
+  border-radius: 24px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .insight-card label {
-    font-size: 11px;
-    font-weight: 800;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    display: block;
-    margin-bottom: 16px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  font-weight: 800;
+  color: #64748b;
 }
 
-.volatility-status {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-family: 'JetBrains Mono';
-    font-size: 22px;
-    font-weight: 800;
+/* Consistência */
+#meter-consistency {
+  background: linear-gradient(
+    90deg,
+    #00a3ff,
+    #22c55e
+  );
+  box-shadow: 0 0 20px rgba(0, 163, 255, 0.5);
 }
 
-.pulse-icon {
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    position: relative;
-    background: currentColor;
+/* ---------- VOLATILIDADE ---------- */
+#vol-level {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 1px;
 }
 
-.pulse-icon::after {
-    content: ''; position: absolute; inset: -4px;
-    border-radius: 50%; border: 2px solid currentColor;
-    animation: pulse-ring 1.5s infinite;
+#vol-pulse {
+  position: relative;
+}
+
+#vol-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  opacity: 0.7;
+  animation: pulse-ring 1.4s infinite;
 }
 
 @keyframes pulse-ring {
-    0% { transform: scale(0.5); opacity: 1; }
-    100% { transform: scale(2.5); opacity: 0; }
+  0% {
+    transform: scale(0.4);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
 }
 
-/* COLUNA DA DIREITA (RANKING) */
-.ranking-column {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+/* ---------- RIGHT PANEL ---------- */
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.ranking-card {
-    padding: 24px;
-    min-height: 400px;
+.panel-card {
+  background: linear-gradient(
+    165deg,
+    rgba(30, 41, 59, 0.6),
+    rgba(15, 23, 42, 0.95)
+  );
+  border-radius: 26px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
 }
 
 .ranking-item {
-    background: rgba(30, 41, 59, 0.3);
-    padding: 16px;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 12px;
-    transition: 0.3s;
+  background: rgba(30, 41, 59, 0.4);
+  padding: 14px 16px;
+  border-radius: 16px;
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: all 0.25s ease;
 }
 
 .ranking-item:hover {
-    background: rgba(30, 41, 59, 0.6);
-    transform: translateX(5px);
-    border-color: #00a3ff;
+  background: rgba(30, 41, 59, 0.7);
+  transform: translateX(6px);
+  border-color: #00a3ff;
 }
 
-.m-name { font-size: 12px; font-weight: 600; color: #f8fafc; }
-.m-value { font-family: 'JetBrains Mono'; color: #00a3ff; font-weight: 800; }
+.m-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f8fafc;
+}
 
-/* DICA DO SISTEMA (CARTÃO VERMELHO) */
-.tips-card {
-    background: rgba(244, 63, 94, 0.05);
-    border: 1px solid rgba(244, 63, 94, 0.2);
-    border-radius: 24px;
-    padding: 24px;
+.m-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  color: #00a3ff;
+}
+
+/* ---------- TIP CARD ---------- */
+.panel-card.tips {
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.25);
 }
