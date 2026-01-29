@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance | Bankroll Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages/performance.css">
+</head>
+<body>
+
+<div class="app-container">
+  <aside class="sidebar-new">
+    <div class="brand"><div class="logo-icon">B</div><span>Bankroll<strong>Pro</strong></span></div>
+    <nav class="side-nav">
+      <div class="nav-group">
+        <label>PRINCIPAL</label>
+        <a href="index.html" class="nav-item">Dashboard</a>
+        <a href="performance.html" class="nav-item active">Performance</a>
+      </div>
+      <div class="nav-group">
+        <label>GESTÃO</label>
+        <a href="bancas.html" class="nav-item">Bancas</a>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="main-viewport">
+    <div class="scroll-area">
+      <header class="view-header">
+        <div class="header-content">
+          <h1>Análise de Performance</h1>
+          <p>Métricas de consistência e inteligência de dados</p>
+        </div>
+      </header>
+
+      <section class="top-metrics" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+        <div class="metric-card"><span>Profit Factor</span><h2 id="profit-factor">0.00</h2></div>
+        <div class="metric-card"><span>ROI Total</span><h2 id="total-roi">0%</h2></div>
+        <div class="metric-card"><span>Banca Atual</span><h2 id="current-balance">€0.00</h2></div>
+      </section>
+
+      <div class="performance-flow">
+        <section class="chart-box-large">
+          <label style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 800;">Evolução de ROI (%)</label>
+          <div class="chart-container">
+            <canvas id="roiChart"></canvas>
+          </div>
+        </section>
+
+        <section class="support-metrics">
+          <div class="insight-card">
+            <label>Consistência</label>
+            <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; margin: 15px 0; overflow: hidden;">
+              <div id="meter-consistency" style="height: 100%; background: var(--accent); width: 0%; transition: width 1s ease;"></div>
+            </div>
+            <p id="consistency-text" style="font-size: 12px; color: #94a3b8;"></p>
+          </div>
+          
+          <div class="insight-card">
+            <label>Volatilidade</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+              <span id="vol-level" style="font-family: 'JetBrains Mono'; font-size: 22px; font-weight: 800;">---</span>
+              <div id="vol-pulse" style="width: 12px; height: 12px; border-radius: 50%;"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <aside class="right-panel">
+    <div class="panel-card" style="width: 100%;">
+      <h3>Melhores Mercados</h3>
+      <div id="market-leaderboard" class="ranking-list">
+        </div>
+    </div>
+
+    <div class="panel-card tips" style="width: 100%;">
+      <h4>Dica do Sistema</h4>
+      <p>Um "🟥 Cartão Vermelho" é o cisne negro que destrói qualquer modelo estatístico. Gere a tua stake com cautela.</p>
+    </div>
+  </aside>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const bets = JSON.parse(localStorage.getItem('bets')) || [];
+  const initialBank = Number(localStorage.getItem('bankroll_base')) || 1000;
+
+  function runPerformance() {
+    if(bets.length === 0) return;
+
+    let wins = 0, losses = 0, currentProfit = 0;
+    let roiPoints = [0], markets = {};
+
+    bets.forEach(b => {
+      const p = Number(b.profit);
+      if(p > 0) wins += p; else losses += Math.abs(p);
+      currentProfit += p;
+      roiPoints.push(((currentProfit / initialBank) * 100).toFixed(2));
+
+      if(!markets[b.market]) markets[b.market] = { w: 0, t: 0 };
+      markets[b.market].t++;
+      if(b.result === 'win') markets[b.market].w++;
+    });
+
+    // Update Top Cards
+    document.getElementById('profit-factor').innerText = (wins / (losses || 1)).toFixed(2);
+    document.getElementById('total-roi').innerText = roiPoints[roiPoints.length-1] + '%';
+    document.getElementById('current-balance').innerText = `€${(Number(localStorage.getItem('bankroll')) || 1000).toFixed(2)}`;
+
+    // Render Ranking à Direita
+    const rankCont = document.getElementById('market-leaderboard');
+    Object.keys(markets).sort((a,b) => (markets[b].w/markets[b].t) - (markets[a].w/markets[a].t)).forEach(m => {
+      const perc = ((markets[m].w / markets[m].total || markets[m].t) * 100).toFixed(1);
+      rankCont.innerHTML += `
+        <div class="ranking-item">
+          <span class="m-name">${m}</span>
+          <span class="m-value">${perc}%</span>
+        </div>`;
+    });
+
+    // Chart
+    new Chart(document.getElementById('roiChart'), {
+      type: 'line',
+      data: {
+        labels: roiPoints.map((_, i) => i),
+        datasets: [{
+          data: roiPoints, borderColor: '#00a3ff', fill: true, tension: 0.4,
+          backgroundColor: 'rgba(0, 163, 255, 0.05)', pointRadius: 0
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    // Consistency
+    const rate = ((bets.filter(b => b.result === 'win').length / bets.length) * 100).toFixed(0);
+    document.getElementById('meter-consistency').style.width = rate + '%';
+    document.getElementById('consistency-text').innerText = `${rate}% de Taxa de Acerto`;
+
+    // Volatility
+    const vol = document.getElementById('vol-level');
+    const pulse = document.getElementById('vol-pulse');
+    const isHigh = (losses > wins); 
+    vol.innerText = isHigh ? "ALTA" : "ESTÁVEL";
+    vol.style.color = isHigh ? "#f43f5e" : "#00a3ff";
+    pulse.style.background = isHigh ? "#f43f5e" : "#00a3ff";
+  }
+
+  runPerformance();
+</script>
+</body>
+</html>
