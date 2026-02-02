@@ -204,7 +204,7 @@ function updateUI() {
   renderChart();
 }
 
-// 2. SUBMISSÃO COM DATA DO INPUT E TRAVÃO "CARTÃO VERMELHO"
+// DENTRO DO document.getElementById('bet-form').onsubmit:
 document.getElementById('bet-form').onsubmit = e => {
   e.preventDefault();
   const stake = Number(document.getElementById('stake').value);
@@ -212,13 +212,17 @@ document.getElementById('bet-form').onsubmit = e => {
   // Travão de Segurança (Cartão Vermelho) [cite: 2026-01-20]
   const maxSafety = bankroll * 0.10;
   if (stake > maxSafety) {
-    if (!confirm(`⚠️ ALERTA DE RISCO: Esta stake excede 10% da banca. Risco de Cartão Vermelho detetado. Continuar?`)) return;
+    if (!confirm(`⚠️ ALERTA DE RISCO: Esta stake excede 10% da banca. Continuar?`)) return;
   }
 
   const odds = Number(document.getElementById('odds').value);
   const result = document.getElementById('result').value;
-  const chosenDate = document.getElementById('bet-date').value; // Captura a data do input
   
+  // CORREÇÃO: Pega na data do input MAS adiciona a hora atual para o gráfico não empilhar tudo no "zero"
+  const dateInput = document.getElementById('bet-date').value;
+  const now = new Date();
+  const timestamp = new Date(dateInput + 'T' + now.toTimeString().split(' ')[0]);
+
   let profit = result === 'win' ? stake * (odds - 1) : (result === 'loss' ? -stake : 0);
 
   bets.push({ 
@@ -226,13 +230,18 @@ document.getElementById('bet-form').onsubmit = e => {
     event: document.getElementById('event').value, 
     stake, 
     odds, 
-    profit, 
+    profit: Number(profit.toFixed(2)), 
     result, 
     market: document.getElementById('market').value, 
-    date: chosenDate // Guarda a data correta para filtros futuros
+    date: timestamp.toISOString() // Grava formato universal ISO
   });
   
-  bankroll += profit;
+  // Salva a banca inicial se for a primeira aposta (Para a Performance saber onde começou)
+  if (!localStorage.getItem('bankroll_base')) {
+      localStorage.setItem('bankroll_base', bankroll);
+  }
+
+  bankroll = Number((bankroll + profit).toFixed(2));
   localStorage.setItem('bankroll', bankroll);
   localStorage.setItem('bets', JSON.stringify(bets));
   
@@ -251,30 +260,26 @@ function updateBancaAtiva(novoSaldo) {
     }
 }
 
+// CORREÇÃO NO renderHistory:
 function renderHistory() {
   const container = document.getElementById('bets-history');
   container.innerHTML = '';
   
   bets.slice().reverse().forEach(b => {
-    // FORMATAÇÃO HUMANA DA DATA
     const dataObj = new Date(b.date);
-    const dia = dataObj.getDate().toString().padStart(2, '0');
-    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const mes = meses[dataObj.getMonth()];
-    const hora = dataObj.getHours().toString().padStart(2, '0');
-    const min = dataObj.getMinutes().toString().padStart(2, '0');
-    
-    const dataFormatada = `${dia} ${mes} | ${hora}:${min}`;
+    // Formatação robusta
+    const dataFormatada = dataObj.toLocaleDateString('pt-PT', {day:'2-digit', month:'short'}) + 
+                          ' | ' + dataObj.toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'});
 
     const card = document.createElement('div');
     card.className = `bet-card-new ${b.result}`;
     card.innerHTML = `
       <div class="event-section">
         <strong>${b.event}</strong>
-        <span style="font-size: 10px; opacity: 0.7; color: var(--accent);">${dataFormatada} • ${b.market}</span>
+        <span style="font-size: 10px; opacity: 0.7; color: #00a3ff;">${dataFormatada} • ${b.market}</span>
       </div>
-      <div class="data-column"><span>Stake</span><b>€${b.stake}</b></div>
-      <div class="data-column"><span>Odds</span><b>${b.odds}</b></div>
+      <div class="data-column"><span>Stake</span><b>€${b.stake.toFixed(2)}</b></div>
+      <div class="data-column"><span>Odds</span><b>${b.odds.toFixed(2)}</b></div>
       <div class="profit-column">
         <span style="font-size: 10px; color: #64748b; font-weight: 800; text-transform: uppercase;">Resultado</span>
         <b style="color: ${b.profit >= 0 ? '#22c55e' : '#f43f5e'}">
