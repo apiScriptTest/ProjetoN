@@ -5,191 +5,141 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bancas | Bankroll Elite Pro</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/layout.css">
-  <link rel="stylesheet" href="assets/css/components.css">
-  <link rel="stylesheet" href="assets/css/modal.css">
-  <link rel="stylesheet" href="assets/css/pages/bancas.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="assets/css/main.css"><link rel="stylesheet" href="assets/css/layout.css"><link rel="stylesheet" href="assets/css/components.css"><link rel="stylesheet" href="assets/css/modal.css">
+  <style>
+    .bancas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 30px; padding: 20px 0; }
+    .banca-card { 
+      background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.03); border-radius: 24px; padding: 30px; position: relative; overflow: hidden;
+      filter: saturate(0.5) brightness(0.8); transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1); 
+    }
+    .banca-card.active { filter: saturate(1) brightness(1.1); background: #0f172a; border-color: #00a3ff; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    .banca-card:not(.active):hover { filter: saturate(0.9) brightness(1); border-color: rgba(0,163,255,0.3); transform: translateY(-5px); }
+    
+    .trans-panel { 
+      position: absolute; inset: 0; background: #0f172a; z-index: 10; display: flex; flex-direction: column; justify-content: center; padding: 30px;
+      opacity: 0; visibility: hidden; transform: translateY(100%); transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s;
+    }
+    .trans-panel.open { opacity: 1; visibility: visible; transform: translateY(0); }
+    
+    .trans-input-wrapper { position: relative; margin: 20px 0; }
+    .trans-input-wrapper span { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #00a3ff; font-family: 'JetBrains Mono'; font-weight: 800; }
+    .trans-input { width: 100%; background: #1e293b; border: 1px solid rgba(0,163,255,0.1); border-radius: 14px; padding: 15px 15px 15px 35px; color: white; font-family: 'JetBrains Mono'; font-size: 22px; outline: none; transition: all 0.3s; }
+    .trans-input:focus { border-color: #00a3ff; box-shadow: 0 0 20px rgba(0,163,255,0.15); }
+    .status-badge { font-size: 9px; font-weight: 800; padding: 5px 14px; border-radius: 30px; background: rgba(0,163,255,0.1); color: #00a3ff; letter-spacing: 1px; }
+    .health-container { margin: 25px 0; }
+    .health-bar-bg { height: 3px; background: rgba(255,255,255,0.03); border-radius: 10px; overflow: hidden; }
+    .health-bar-fill { height: 100%; background: #00a3ff; transition: width 1s ease; }
+    .balance-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 20px; }
+    .cash-controls { display: flex; gap: 12px; }
+    .btn-cash { width: 42px; height: 42px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); background: #1e293b; color: #94a3b8; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .btn-cash:hover { transform: translateY(-3px); color: white; border-color: rgba(255,255,255,0.1); }
+    .banca-footer { display: flex; gap: 15px; margin-top: 25px; }
+    .btn-main { flex: 1; height: 46px; border-radius: 12px; font-weight: 800; font-size: 11px; cursor: pointer; transition: all 0.3s; letter-spacing: 0.5px; border: none; }
+    .btn-use { background: #00a3ff; color: white; }
+    .btn-use.active { background: rgba(255,255,255,0.05); color: #475569; cursor: default; }
+    .btn-opt { background: transparent; border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; }
+    .btn-opt:hover { border-color: white; color: white; }
+  </style>
 </head>
 <body>
-
 <div class="app-container">
   <aside class="sidebar-new">
-    <div class="brand">
-      <div class="logo-icon">B</div>
-      <span>Bankroll<strong>Pro</strong></span>
-    </div>
+    <div class="brand"><div class="logo-icon" style="background: #00a3ff;">B</div><span>Bankroll<strong>Pro</strong></span></div>
     <nav class="side-nav">
-      <div class="nav-group">
-        <label>PRINCIPAL</label>
-        <a href="index.html" class="nav-item">Dashboard</a>
-        <a href="performance.html" class="nav-item">Performance</a>
-      </div>
-      <div class="nav-group">
-        <label>GESTÃO</label>
-        <a href="bancas.html" class="nav-item active">Bancas</a>
-      </div>
+      <div class="nav-group"><label>PRINCIPAL</label><a href="index.html" class="nav-item">Dashboard</a><a href="performance.html" class="nav-item">Performance</a></div>
+      <div class="nav-group"><label>GESTÃO</label><a href="bancas.html" class="nav-item active">Bancas</a></div>
     </nav>
-    <div class="sidebar-footer">
-      <button class="btn-primary-glow" onclick="location.href='index.html'">+ Nova Aposta</button>
-    </div>
   </aside>
-
   <main class="main-viewport">
     <header class="view-header">
-      <div class="header-content">
-        <h1>Gestão de Bancas</h1>
-        <p>Configura e monitoriza as tuas carteiras de investimento</p>
-      </div>
-      <button class="btn-primary-glow" id="btn-add-banca" style="width: auto; padding: 0 25px;">+ Adicionar Banca</button>
+      <div class="header-content"><h1>Gestão de Bancas</h1><p>Monitorização de capital e ativos financeiros</p></div>
+      <button class="btn-primary-glow" id="btn-add-banca" style="width: auto; padding: 0 30px; border-radius: 12px;">+ Adicionar Banca</button>
     </header>
-
-    <div class="scroll-area">
-      <div id="bancas-grid" class="bancas-grid"></div>
-    </div>
+    <div class="scroll-area"><div id="bancas-grid" class="bancas-grid"></div></div>
   </main>
 </div>
 
 <div id="modal-banca" class="modal-overlay hidden">
-  <div class="modal-window" style="width: 380px; padding-top: 50px;">
+  <div class="modal-window" style="width: 400px; background: #0f172a; border: 1px solid #1e293b; border-radius: 28px;">
     <button class="btn-close" onclick="toggleModal(false)">×</button>
-    
-    <h3 id="modal-title" style="margin-bottom: 25px;">Configurar Banca</h3>
+    <h3 style="margin-bottom: 25px; color: white; font-weight: 800;">Parâmetros da Banca</h3>
     <input type="hidden" id="edit-banca-id"> 
-    
     <div class="input-group">
-      <label>Nome da Carteira</label>
-      <input type="text" id="new-banca-name" placeholder="Ex: Banca Principal">
+      <label style="color: #64748b; font-size: 10px; font-weight: 800;">NOME DA CARTEIRA</label>
+      <input type="text" id="new-banca-name" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.05); color: white; border-radius: 12px; padding: 12px;">
     </div>
-
-    <div class="input-group">
-      <label>Saldo Atual (€)</label>
-      <div class="custom-number-input">
-        <button type="button" class="spin-btn" onclick="stepBanca('new-banca-balance', -50)">-</button>
-        <input type="number" id="new-banca-balance" step="0.01">
-        <button type="button" class="spin-btn" onclick="stepBanca('new-banca-balance', 50)">+</button>
-      </div>
+    <div style="display: flex; gap: 20px; margin-top: 15px;">
+        <div class="input-group" style="flex: 1;"><label style="color: #64748b; font-size: 10px; font-weight: 800;">SALDO (€)</label><input type="number" id="new-banca-balance" step="0.01" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.05); color: white; border-radius: 12px; padding: 12px;"></div>
+        <div class="input-group" style="flex: 1;"><label style="color: #64748b; font-size: 10px; font-weight: 800;">STAKE (%)</label><input type="number" id="new-banca-stake" step="0.1" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.05); color: white; border-radius: 12px; padding: 12px;"></div>
     </div>
-
-    <div class="input-group">
-      <label>Auto-Stake (%)</label>
-      <div class="custom-number-input">
-        <button type="button" class="spin-btn" onclick="stepBanca('new-banca-stake', -1)">-</button>
-        <input type="number" id="new-banca-stake" step="0.1">
-        <button type="button" class="spin-btn" onclick="stepBanca('new-banca-stake', 1)">+</button>
-      </div>
-      <small style="color: #64748b; font-size: 10px; margin-top: 8px; display: block;">Percentagem sugerida por aposta</small>
-    </div>
-    
-    <button class="btn-save-modal" onclick="salvarBanca()" style="margin-top: 15px;">Confirmar Alterações</button>
+    <button class="btn-save-modal" onclick="salvarBanca()" style="margin-top: 25px; background: #00a3ff; height: 50px; border-radius: 14px; font-weight: 800; color: white; border: none; width: 100%; cursor: pointer;">CONFIRMAR ALTERAÇÕES</button>
+    <div id="delete-area" style="margin-top: 20px; display: none; text-align: center;"><button onclick="eliminarBanca()" style="background: transparent; color: #f43f5e; border: none; font-size: 10px; font-weight: 800; cursor: pointer; letter-spacing: 1px;">ELIMINAR ESTE ATIVO DEFINITIVAMENTE</button></div>
   </div>
 </div>
 
 <script>
-  let bancas = JSON.parse(localStorage.getItem('bancas')) || [
-    { id: 1, nome: 'Banca Principal', saldo: 1000.00, ativa: true, stake_default: 2 }
-  ];
-
-  // Função para as setinhas funcionarem no modal de banca
-  function stepBanca(id, step) {
-    const input = document.getElementById(id);
-    let val = parseFloat(input.value) || 0;
-    input.value = (val + step).toFixed(2);
-  }
+  let bancas = JSON.parse(localStorage.getItem('bancas')) || [{ id: 1707070000000, nome: 'Banca Principal', saldo: 3936.60, ativa: true, stake_default: 2 }];
+  let currentTransType = 'in';
 
   function renderBancas() {
-    const grid = document.getElementById('bancas-grid');
-    grid.innerHTML = '';
-
+    const grid = document.getElementById('bancas-grid'); grid.innerHTML = '';
     bancas.forEach(b => {
-      const isCritical = b.saldo < 500; 
-      const healthPercent = Math.min((b.saldo / 1000) * 100, 100);
-
-      const card = document.createElement('div');
-      card.className = `banca-card ${b.ativa ? 'active' : ''}`;
+      const health = Math.min((b.saldo / 10000) * 100, 100);
+      const card = document.createElement('div'); card.className = `banca-card ${b.ativa ? 'active' : ''}`;
       card.innerHTML = `
-        <div class="banca-header">
-          <h3>${b.nome}</h3>
-          ${b.ativa ? '<span class="status-badge">ATIVA</span>' : ''}
-        </div>
-        <div class="banca-body">
-          <span style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase;">Saldo Disponível</span>
-          <h2 class="balance" style="font-family: 'JetBrains Mono';">€${parseFloat(b.saldo).toFixed(2)}</h2>
-          <div class="risk-bar-container">
-            <div class="risk-fill ${isCritical ? 'risk-warning' : ''}" style="width: ${healthPercent}%"></div>
-          </div>
-          <p style="font-size: 10px; color: ${isCritical ? '#f43f5e' : '#64748b'}; margin: 0; font-weight: 600;">
-            ${isCritical ? '⚠️ RISCO DE CARTÃO VERMELHO' : 'MODELO ESTATÍSTICO ESTÁVEL'}
-          </p>
-        </div>
-        <div class="banca-actions" style="display: flex; gap: 10px; margin-top: 15px;">
-          <button class="btn-config" style="flex: 2; margin-top: 0;" onclick="selecionarBanca(${b.id})">
-            ${b.ativa ? 'Em Uso' : 'Selecionar'}
-          </button>
-          <button class="btn-edit-small" style="flex: 1; background: #1e293b; color: #fff; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;" onclick="abrirEditor(${b.id})">Editar</button>
-        </div>
-      `;
+        <div class="trans-panel" id="panel-${b.id}"><h4 id="panel-title-${b.id}" style="color: white; font-size: 12px; font-weight: 800; margin: 0;">MOVIMENTAR</h4><div class="trans-input-wrapper"><span>€</span><input type="number" class="trans-input" id="input-${b.id}" placeholder="0.00"></div><div style="display: flex; gap: 10px;"><button onclick="executarMovimento(${b.id})" style="flex: 2; height: 45px; background: #00a3ff; border: none; border-radius: 12px; color: white; font-weight: 800; cursor: pointer;">CONFIRMAR</button><button onclick="closeTrans(${b.id})" style="flex: 1; background: #1e293b; border: none; border-radius: 12px; color: white; cursor: pointer;"><i class="fa fa-times"></i></button></div></div>
+        <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 10px; font-weight: 800; color: #475569; letter-spacing: 1px;">ESTADO</span>${b.ativa ? '<span class="status-badge">ACTIVE ASSET</span>' : '<span style="color:#475569; font-size:9px; font-weight:800;">INACTIVE</span>'}</div>
+        <h3 style="margin: 15px 0 30px 0; font-size: 20px; font-weight: 800; color: white;">${b.nome}</h3>
+        <div class="balance-row"><div><span style="font-size: 9px; color: #64748b; font-weight: 800; letter-spacing: 0.5px;">VALOR EM CARTEIRA</span><div style="display: flex; align-items: baseline; gap: 6px; margin-top: 5px;"><span style="font-size: 14px; color: #00a3ff; font-weight: 800;">€</span><span style="font-family: 'JetBrains Mono'; font-size: 30px; letter-spacing: -1.5px; color: white;">${parseFloat(b.saldo).toLocaleString('pt-PT', {minimumFractionDigits: 2})}</span></div></div><div class="cash-controls"><button class="btn-cash" onclick="openTrans(${b.id}, 'in')"><i class="fa fa-money"></i></button><button class="btn-cash" onclick="openTrans(${b.id}, 'out')"><i class="fa fa-external-link"></i></button></div></div>
+        <div class="health-container"><div style="display:flex; justify-content:space-between; font-size:9px; font-weight:800; color:#475569; margin-bottom:8px;"><span>SAÚDE</span><span>${health.toFixed(0)}%</span></div><div class="health-bar-bg"><div class="health-bar-fill" style="width: ${health}%"></div></div></div>
+        <div style="font-size: 10px; font-weight: 800; color: #475569;">RISCO: <span style="color: #00a3ff;">${b.stake_default}% STAKE</span></div>
+        <div class="banca-footer"><button class="btn-main ${b.ativa ? 'btn-use active' : 'btn-use'}" onclick="${b.ativa ? '' : `selecionarBanca(${b.id})`}">${b.ativa ? 'UTILIZANDO' : 'ACTIVAR BANCA'}</button><button class="btn-main btn-opt" onclick="abrirEditor(${b.id})">CONFIGURAR</button></div>`;
       grid.appendChild(card);
     });
   }
 
+  function openTrans(id, tipo) {
+    currentTransType = tipo; const panel = document.getElementById(`panel-${id}`); const title = document.getElementById(`panel-title-${id}`); const input = document.getElementById(`input-${id}`);
+    title.innerText = tipo === 'in' ? 'INJETAR CAPITAL' : 'RETIRAR CAPITAL'; title.style.color = tipo === 'in' ? '#10b981' : '#f43f5e';
+    panel.classList.add('open'); setTimeout(() => input.focus(), 300);
+  }
+  function closeTrans(id) { document.getElementById(`panel-${id}`).classList.remove('open'); }
+  function executarMovimento(id) {
+    const input = document.getElementById(`input-${id}`); const valor = parseFloat(input.value);
+    if (isNaN(valor) || valor <= 0) return;
+    const idx = bancas.findIndex(b => b.id == id);
+    if (currentTransType === 'out' && valor > bancas[idx].saldo) return alert("SALDO INSUFICIENTE");
+    bancas[idx].saldo += (currentTransType === 'in' ? valor : -valor);
+    if (bancas[idx].ativa) localStorage.setItem('bankroll', bancas[idx].saldo);
+    localStorage.setItem('bancas', JSON.stringify(bancas)); renderBancas();
+  }
   function selecionarBanca(id) {
-    bancas.forEach(b => b.ativa = (b.id === id));
-    const ativa = bancas.find(b => b.ativa);
-    localStorage.setItem('bankroll', ativa.saldo);
-    localStorage.setItem('active_stake_percent', ativa.stake_default || 2);
-    localStorage.setItem('bancas', JSON.stringify(bancas));
-    renderBancas();
+    bancas.forEach(b => b.ativa = (b.id === id)); const ativa = bancas.find(b => b.ativa);
+    localStorage.setItem('bankroll', ativa.saldo); localStorage.setItem('active_stake_percent', ativa.stake_default);
+    localStorage.setItem('bancas', JSON.stringify(bancas)); renderBancas();
   }
-
   function abrirEditor(id) {
-    const banca = bancas.find(b => b.id === id);
-    document.getElementById('modal-title').innerText = "Editar Banca";
-    document.getElementById('edit-banca-id').value = banca.id;
-    document.getElementById('new-banca-name').value = banca.nome;
-    document.getElementById('new-banca-balance').value = banca.saldo.toFixed(2);
-    document.getElementById('new-banca-stake').value = (banca.stake_default || 2).toFixed(2);
-    toggleModal(true);
+    const b = bancas.find(x => x.id === id); document.getElementById('edit-banca-id').value = b.id; document.getElementById('new-banca-name').value = b.nome; document.getElementById('new-banca-balance').value = b.saldo; document.getElementById('new-banca-stake').value = b.stake_default;
+    document.getElementById('delete-area').style.display = 'block'; toggleModal(true);
   }
-
-  document.getElementById('btn-add-banca').onclick = () => {
-    document.getElementById('modal-title').innerText = "Nova Banca";
-    document.getElementById('edit-banca-id').value = ""; 
-    document.getElementById('new-banca-name').value = "";
-    document.getElementById('new-banca-balance').value = "1000.00";
-    document.getElementById('new-banca-stake').value = "2.00";
-    toggleModal(true);
-  };
-
-  function toggleModal(show) {
-    const modal = document.getElementById('modal-banca');
-    show ? modal.classList.remove('hidden') : modal.classList.add('hidden');
-  }
-  
+  function toggleModal(s) { document.getElementById('modal-banca').classList.toggle('hidden', !s); }
   function salvarBanca() {
-    const id = document.getElementById('edit-banca-id').value;
-    const nome = document.getElementById('new-banca-name').value;
-    const saldo = parseFloat(document.getElementById('new-banca-balance').value);
-    const stake = parseFloat(document.getElementById('new-banca-stake').value);
-
-    if (nome && !isNaN(saldo)) {
-        if (id) {
-            const index = bancas.findIndex(b => b.id == id);
-            bancas[index].nome = nome;
-            bancas[index].saldo = saldo;
-            bancas[index].stake_default = stake;
-            if(bancas[index].ativa) {
-                localStorage.setItem('bankroll', saldo);
-                localStorage.setItem('active_stake_percent', stake);
-            }
-        } else {
-            bancas.push({ id: Date.now(), nome, saldo, ativa: false, stake_default: stake });
-        }
-        localStorage.setItem('bancas', JSON.stringify(bancas));
-        renderBancas();
-        toggleModal(false);
-    }
+    const id = document.getElementById('edit-banca-id').value; const nome = document.getElementById('new-banca-name').value; const saldo = parseFloat(document.getElementById('new-banca-balance').value); const stake = parseFloat(document.getElementById('new-banca-stake').value);
+    if (id) {
+      const idx = bancas.findIndex(x => x.id == id); bancas[idx] = {...bancas[idx], nome, saldo, stake_default: stake};
+      if(bancas[idx].ativa) { localStorage.setItem('bankroll', saldo); localStorage.setItem('active_stake_percent', stake); }
+    } else { bancas.push({ id: Date.now(), nome, saldo, ativa: false, stake_default: stake }); }
+    localStorage.setItem('bancas', JSON.stringify(bancas)); renderBancas(); toggleModal(false);
   }
+  function eliminarBanca() {
+    const id = document.getElementById('edit-banca-id').value; if (bancas.find(x => x.id == id).ativa) return alert("PROIBIDO ELIMINAR ATIVO EM USO");
+    if (confirm("CONFIRMAR ELIMINAÇÃO?")) { bancas = bancas.filter(x => x.id != id); localStorage.setItem('bancas', JSON.stringify(bancas)); renderBancas(); toggleModal(false); }
+  }
+  document.getElementById('btn-add-banca').onclick = () => {
+    document.getElementById('edit-banca-id').value = ""; document.getElementById('new-banca-name').value = ""; document.getElementById('new-banca-balance').value = "1000"; document.getElementById('new-banca-stake').value = "2";
+    document.getElementById('delete-area').style.display = 'none'; toggleModal(true);
+  };
   renderBancas();
 </script>
 </body>
